@@ -1,0 +1,128 @@
+{% extends 'admin_temp/base.html' %}
+{% load static %}
+{% block title %}ORDERS{% endblock title %}
+{% block body %}
+
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+        <div class="aside-top">
+            <a href="/admin_index" class="brand-wrap">
+                <img src="{% static 'assets/imgs/theme/logo.png' %}" class="logo" alt="Evara Dashboard">
+            </a>
+            <div>
+                <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
+            </div>
+        </div>
+        <nav>
+            <ul class="menu-aside">
+                <li class="menu-item ">
+                    <a class="menu-link" href="/admin_index"> <i class="icon material-icons md-home"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin_category"> <i class="icon material-icons md-comment"></i>
+                        <span class="text">Category</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin_products"> <i class="icon material-icons md-shopping_bag"></i>
+                        <span class="text">Products</span>
+                    </a>
+                </li>
+                <li class="menu-item active">
+                    <a class="menu-link" href="/admin_orders"> <i class="icon material-icons md-shopping_cart"></i>
+                        <span class="text">Orders</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a class="menu-link" href="/admin_coupons"> <i class="icon material-icons md-local_offer"></i>
+                        <span class="text">Coupon</span>
+                    </a>
+                </li>
+                <li class="menu-item  ">
+                    <a class="menu-link" href="/admin_users"> <i class="icon material-icons md-person"></i>
+                        <span class="text">Users List</span>
+                    </a>
+                </li>
+                <li class="menu-item  ">
+                    <a class="menu-link" href="/admin_banners"> <i class="icon material-icons md-store"></i>
+                        <span class="text">Banners</span>
+                    </a>
+                </li>
+            </ul>
+            
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Order List </h2>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <header class="card-header">
+                    <div class="row gx-3">
+                        <div class="col-lg-4 col-md-6 me-auto">
+                            <input type="text" placeholder="Search..." class="form-control">
+                        </div>
+                </header>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Mob Number</th>
+                                    <th scope="col">Total Amount</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col"> Order Date</th>
+                                    <th scope="col"> Action </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1233</td>
+                                    <td><b>Esther Howard</b></td>
+                                    <td>123456789</td>
+                                    <td>$12.00</td>
+                                    <td><span class="badge rounded-pill alert-danger">Canceled</span></td>
+                                    <td>03.07.2020</td>
+                                    <td>
+                                        <div class="dropdown">
+                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#">Edit</a>
+                                                <a class="dropdown-item text-danger" href="#">Delete</a>
+                                            </div>
+                                        </div> <!-- dropdown //end -->
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>1233</td>
+                                    <td><b>Esther Howard</b></td>
+                                    <td>123456789</td>
+                                    <td>$12.00</td>
+                                    <td><span class="badge rounded-pill alert-success">Recived</span></td>
+                                    <td>03.07.2020</td>
+                                    <td>
+                                        <div class="dropdown">
+                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#">Download Invoice</a>
+                                                <a class="dropdown-item text-danger" href="#">Delete</a>
+                                            </div>
+                                        </div> <!-- dropdown //end -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div> <!-- table-responsive //end -->
+                </div> <!-- card-body end// -->
+            </div> <!-- card end// -->
+        </section>
+    </main>
+
+{% endblock body %}

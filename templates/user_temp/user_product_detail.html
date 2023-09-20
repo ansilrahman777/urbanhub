@@ -1,0 +1,216 @@
+{% extends 'user_temp/base.html' %}
+{% load static %}
+{% block title %}ABOUT{% endblock title %}
+{% block body %}
+
+    <!-- Breadcrumb Section Begin -->
+    <section class="shop-details">
+    <form action="{% url 'user_add_cart' single_product.id %}" method="POST">
+        {% csrf_token %}
+        <div class="product__details__pic">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="product__details__breadcrumb">
+                            <a href="/">Home</a>
+                            <a href="/user_shop">Shop</a>
+                            <span>Product Details</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <style>
+                        .zoomable-image {
+                            transition: transform 0.3s ease-in-out;
+                        }
+                    </style>
+                    <div class="col-lg-3 col-md-3">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab">
+                                    {% if single_product.product_images %}
+                                    <div class="product__thumb__pic set-bg"  data-setbg="{{ single_product.product_images.url}}">
+                                    </div>
+                                    {% else %}
+                                    <p>No image available</p>
+                                    {% endif %} 
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">
+                                    {% if single_product.product_image_1 %}
+                                    <div class="product__thumb__pic set-bg  " data-setbg="{{ single_product.product_image_1.url}}">
+                                    </div>
+                                    {% else %}
+                                    <p>No image available</p>
+                                    {% endif %} 
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab">
+                                    {% if single_product.product_image_2 %}
+                                    <div class="product__thumb__pic set-bg  " data-setbg="{{ single_product.product_image_2.url}}">
+                                    </div>
+                                    {% else %}
+                                    <p>No image available</p>
+                                    {% endif %} 
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab">
+                                    {% if single_product.product_image_3 %}
+                                    <div class="product__thumb__pic set-bg" data-setbg="{{ single_product.product_image_3.url}}">
+                                        <i class="fa fa-play"></i>
+                                    </div>
+                                    {% else %}
+                                    <p>No image available</p>
+                                    {% endif %} 
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 col-md-9">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="tabs-1" role="tabpanel">
+                                {% if single_product.product_images %}
+                                <div class="product__details__pic__item">
+                                    <img src="{{ single_product.product_images.url }}" alt="" class="zoomable-image">
+                                </div>
+                                {% else %}
+                                    <p>No image available</p>
+                                {% endif %} 
+                            </div>
+                            
+                            <div class="tab-pane" id="tabs-2" role="tabpanel">
+                                {% if single_product.product_image_1 %}
+                                <div class="product__details__pic__item">
+                                    <img src="{{ single_product.product_image_1.url }}" alt="" class="zoomable-image">
+                                </div>
+                                {% else %}
+                                    <p>No image available</p>
+                                {% endif %} 
+                            </div>
+                            
+                            <div class="tab-pane" id="tabs-3" role="tabpanel">
+                                {% if single_product.product_image_2 %}
+                                <div class="product__details__pic__item">
+                                    <img src="{{ single_product.product_image_2.url }}" alt="" class="zoomable-image">
+                                </div>
+                                {% else %}
+                                    <p>No image available</p>
+                                {% endif %} 
+                            </div>
+                            <div class="tab-pane" id="tabs-4" role="tabpanel">
+                                {% if single_product.product_image_3 %}
+                                <div class="product__details__pic__item">
+                                    <img src="{{ single_product.product_image_3.url}} " alt="">
+                                    <a href="https://www.youtube.com/watch?v=8PJ3_p7VqHw&list=RD8PJ3_p7VqHw&start_radio=1" class="video-popup"><i class="fa fa-play"></i></a>
+                                </div>
+                                {% else %}
+                                    <p>No image available</p>
+                                {% endif %} 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="product__details__content">
+            <div class="container">
+                <div class="row d-flex justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="product__details__text">
+                                <h4>{{ single_product.product_name}}</h4>
+                                <div class="rating">
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star-o"></i>
+                                    <span> - 5 Reviews</span>
+                                </div>
+                                <h3>{{ single_product.price}}RS<span></span></h3>
+                                <p>{{ single_product.description}}</p>
+                                <div class="product__details__option">
+                                    <div class="product__details__option__size">
+                                            <span>Size:</span>
+                                            {% for i in single_product.variation_set.sizes %}
+                                            <label for="{{i.variation_value | lower}}" class="size-label">
+                                                <input type="radio" id="{{i.variation_value | lower}}" name="size" value="{{i.variation_value | lower}}" required>
+                                                {{i.variation_value | capfirst}}
+                                            </label>
+                                            {% endfor %}
+                                    </div>
+                                    <div class="product__details__option__color">
+                                            <span>Color:</span>
+                                            {% for i in single_product.variation_set.colors %}
+                                            <label for="{{i.variation_value | lower}}" class="{{i.variation_value}}">
+                                                <input type="radio"  id="{{i.variation_value | lower}}" name="color" value="{{i.variation_value | lower}}" required>
+                                                {{i.variation_value | capfirst}}
+                                            </label>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="product__details__cart__option">
+                                    <div class="quantity">
+                                        <div class="col"> 
+                                            {% comment %} <div class="input-group input-spinner">
+                                                <div class="input-group-prepend">
+                                                <a href="{% url 'user_remove_cart' single_product.id %}" class="btn btn-light" type="button" id="button-plus"> <i class="fa fa-minus"></i> </a>
+                                                </div>
+                                                <input type="text" class="form-control"  value="{{cart_item.quantity}}">
+                                                <div class="input-group-append">
+                                                <a href="{% url 'user_add_cart' single_product.id %}" class="btn btn-light" type="button" id="button-minus"> <i class="fa fa-plus"></i> </a>
+                                                </div>
+                                            </div>  {% endcomment %}
+                                        </div> 
+                                    </div>
+                                    {% if single_product.quantity <= 0 %}
+                                    <a href="#" class="primary-btn" style="background-color: red; color: white;">out of stock</a>
+                                    {% else %}
+                                    <button type="method"  class="primary-btn">add to cart</button>
+                                    {% endif %}
+                                </div>
+                                <div class="product__details__btns__option">
+                                    <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
+                                </div>
+                                {% comment %} <div class="product__details__last__option">
+                                    <h5><span>Guaranteed Safe Checkout</span></h5>
+                                    <img src="img/shop-details/details-payment.png" alt="">
+                                    <ul>
+                                        <li><span>SKU:</span> 3812912</li>
+                                        <li><span>Categories:</span> Clothes</li>
+                                        <li><span>Tag:</span> Clothes, Skin, Body</li>
+                                    </ul>
+                                </div> {% endcomment %}
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    </section>
+    <!-- Shop Details Section End -->
+
+<script>
+    const zoomableImages = document.querySelectorAll(".zoomable-image");
+    
+    function toggleZoom(imageElement) {
+        imageElement.addEventListener("click", function() {
+            if (!imageElement.classList.contains("zoomed")) {
+                imageElement.style.transform = "scale(1.8)"; // Zoom in
+                imageElement.classList.add("zoomed");
+            } else {
+                imageElement.style.transform = "scale(1)"; // Zoom out
+                imageElement.classList.remove("zoomed");
+            }
+        });
+    }
+    
+    // Initialize the zoom effect for all images with class "zoomable-image"
+    zoomableImages.forEach(function(image) {
+        toggleZoom(image);
+    });
+</script>
+    
+{% endblock body %}
