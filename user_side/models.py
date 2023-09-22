@@ -5,6 +5,7 @@ from django import forms
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone 
+from decimal import Decimal
 
 
 # Create your models here.
@@ -137,6 +138,21 @@ class Product(models.Model):
     product_image_1 = models.ImageField(upload_to='photos/products', blank=True)
     product_image_2 = models.ImageField(upload_to='photos/products', blank=True)
     product_image_3 = models.ImageField(upload_to='photos/products', blank=True)
+    discount_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Discount percentage (e.g., 10.00 for 10% off)",
+    )
+
+    def get_discounted_price(self):
+        if self.discount_percentage is not None:
+            discount_factor = 1 - (self.discount_percentage / Decimal('100.00'))
+            discounted_price = self.price * discount_factor
+            return discounted_price
+        else:
+            return self.price
 
     def get_url(self):
         return reverse('user_product_detail', args=[self.category.slug,self.slug])

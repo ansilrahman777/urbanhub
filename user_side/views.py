@@ -315,6 +315,7 @@ def user_product_detail(request,category_slug,product_slug):
     user=request.user
     try:
         single_product = Product.objects.get(category__slug=category_slug,slug=product_slug)
+        discounted_price = single_product.get_discounted_price()
         
     except Exception as e:
         raise e
@@ -327,6 +328,7 @@ def user_product_detail(request,category_slug,product_slug):
     context = {
         'single_product': single_product,
         'wishlist_products':wishlist_products,
+        'discounted_price':discounted_price,
     }
     return render(request,'user_temp/user_product_detail.html',context)
 
@@ -1072,7 +1074,7 @@ def user_update_order_status(request, order_id, new_status):
     
     messages.success(request, f"Order #{order.order_number} has been updated to '{new_status}' status.")
     
-    return redirect('user_order_details')
+    return redirect('user_order')
 
 @login_required
 def user_order_detailed_view(request, order_id):

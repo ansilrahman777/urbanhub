@@ -136,27 +136,37 @@
                                     <span> - 5 Reviews</span>
                                 </div>
                                 <h3>{{ single_product.price}}RS<span></span></h3>
+                                {% if single_product.discount_percentage %}
+        <p>Discounted Price: ${{ single_product.get_discounted_price }}</p>
+    {% else %}
+        <p>No discount available</p>
+    {% endif %}
                                 <p>{{ single_product.description}}</p>
                                 <div class="product__details__option">
                                     <div class="product__details__option__size">
-                                            <span>Size:</span>
+                                        {% if single_product.variation_set.sizes %}
+                                        <span>Size:</span>
                                             {% for i in single_product.variation_set.sizes %}
                                             <label for="{{i.variation_value | lower}}" class="size-label">
                                                 <input type="radio" id="{{i.variation_value | lower}}" name="size" value="{{i.variation_value | lower}}" required>
                                                 {{i.variation_value | capfirst}}
                                             </label>
                                             {% endfor %}
+                                        {% endif %}
                                     </div>
                                     <div class="product__details__option__color">
-                                            <span>Color:</span>
+                                        {% if single_product.variation_set.colors %}
+                                        <span>Color:</span>
                                             {% for i in single_product.variation_set.colors %}
                                             <label for="{{i.variation_value | lower}}" class="{{i.variation_value}}">
-                                                <input type="radio"  id="{{i.variation_value | lower}}" name="color" value="{{i.variation_value | lower}}" required>
+                                                <input type="radio" id="{{i.variation_value | lower}}" name="color" value="{{i.variation_value | lower}}" required>
                                                 {{i.variation_value | capfirst}}
                                             </label>
                                             {% endfor %}
+                                        {% endif %}
                                     </div>
                                 </div>
+                                
                                 <div class="product__details__cart__option">
                                     <div class="quantity">
                                         <div class="col"> 
