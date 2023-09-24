@@ -1186,7 +1186,7 @@ def user_apply_coupon(request):
         request.session['applied_coupon_code'] = coupon.coupon_code
         request.session['applied_coupon_discount'] = coupon.discount
 
-        messages.success(request, 'Coupon applied successfully.')
+        messages.success(request, 'Coupon applied successfully and discount is applied.')
 
     return redirect('user_cart')
     
