@@ -64,10 +64,7 @@
                         <div class="header__top__right">
                             {%if user.id is not None%}
                             <div class="header__top__hover">
-                                <span>{{request.user.first_name}} <i class="arrow_carrot-down"></i></span>
-                                <ul>
-                                    <li><a href="/user_logout">LogOut</a></li>
-                                </ul>
+                                <a href="/user_profile ">{{request.user.first_name | capfirst}} {{request.user.last_name | capfirst}} </a>
                             </div>
                             {%else%}
                             <div class="header__top__links">
@@ -113,7 +110,7 @@
                 <div class="col-lg-2 col-md-2">
                     <div class="header__nav__option">
                         <a href="/user_profile" class="search-switch"><img src="{% static 'img/icon/profile.png' %}" alt=""></a>
-                        <a href="#"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
+                        <a href="/user_wishlist"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
                         <a href="/user_cart"><img src="{% static 'img/icon/cart.png'%}" alt=""> <span>0</span></a>
                     </div>
                 </div>
@@ -196,7 +193,6 @@
     <!-- Footer Section End -->
 
     <script src="{% static 'js/jquery-3.3.1.min.js'%}"></script>
-    <script src="{% static 'https://code.jquery.com/jquery-3.6.0.min.js'%}"></script>
     <script src="{% static 'js/jquery-3.6.0.min.js'%}"></script>
     <script src="{% static 'js/bootstrap.min.js'%}"></script>
     <script src="{% static 'js/jquery.nice-select.min.js'%}"></script>

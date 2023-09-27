@@ -29,15 +29,18 @@ urlpatterns = [
     path('user_profile',views.user_profile,name='user_profile'),
     path('user_profile_edit',views.user_profile_edit,name='user_profile_edit'),
     path('user_change_password',views.user_change_password,name='user_change_password'),
-
+    
     path('user_address',views.user_address,name='user_address'),
     path('user_add_address',views.user_add_address,name='user_add_address'),
     path('user_edit_address/<int:id>',views.user_edit_address,name='user_edit_address'),
-    path('user_default_address/<int:id>',views.user_default_address,name='user_default_address'),
     path('user_remove_address/<int:id>',views.user_remove_address,name='user_remove_address'),
 
+    path('user_shipping',views.user_shipping,name='user_shipping'),
     path('user_checkout',views.user_checkout,name='user_checkout'),
     path('user_place_order',views.user_place_order,name='user_place_order'),
+    path('user_payment',views.user_payment,name='user_payment'),
+
+    path('user_wishlist',views.user_wishlist,name='user_wishlist'),
 
 
  

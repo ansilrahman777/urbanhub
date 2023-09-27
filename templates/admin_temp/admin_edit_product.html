@@ -130,17 +130,17 @@
                                 <div class="card-body">
                                     <div class="input-upload">
                                         <img src="{% if product.product_images %}{{ product.product_images.url }}{% else %}{% static 'assets/imgs/theme/placeholder_image.png' %}{% endif %}" alt="">
-                                        <input class="form-control" type="file" name='product_images' value="{{product.product_images.url}}" accept="image/*" required >
+                                        <input class="form-control" type="file" name='product_images' value="{{product.product_images.url}}" accept="image/*"  >
                                     </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="input-upload">
                                         {% if product.product_image_1 %}
                                         <img src="{{ product.product_image_1.url }}" alt="">
-                                        <input class="form-control" type="file" name='product_image_1' value="{{product.product_image_1.url}}" accept="image/*" required >
+                                        <input class="form-control" type="file" name='product_image_1' value="{{product.product_image_1.url}}" accept="image/*"  >
                                         {% else %}
                                         <img src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
-                                        <input class="form-control" type="file" name='product_image_1' accept="image/*" required>
+                                        <input class="form-control" type="file" name='product_image_1' accept="image/*" >
                                         {% endif %}
                                     </div>
                                 </div>
@@ -152,7 +152,7 @@
                                     <div class="input-upload">
                                         {% if product.product_image_2 %}
                                         <img src="{{ product.product_image_2.url }}" alt="">
-                                        <input class="form-control" type="file" name='product_image_2' value="{{product.product_image_2.url}}" accept="image/*" required>
+                                        <input class="form-control" type="file" name='product_image_2' value="{{product.product_image_2.url}}" accept="image/*" >
                                         {% else %}
                                         <img src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
                                         <input class="form-control" type="file" name='product_image_2' accept="image/*" >
@@ -163,10 +163,10 @@
                                     <div class="input-upload">
                                         {% if product.product_image_3 %}
                                         <img src="{{ product.product_image_3.url }}" alt="">
-                                        <input class="form-control" type="file" name='product_image_1' value="{{product.product_image_3.url}}" accept="image/*"required >
+                                        <input class="form-control" type="file" name='product_image_1' value="{{product.product_image_3.url}}" accept="image/*" >
                                         {% else %}
                                         <img src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
-                                        <input class="form-control" type="file" name='product_image_3' accept="image/*" required>
+                                        <input class="form-control" type="file" name='product_image_3' accept="image/*" >
                                         {% endif %}
                                     </div>
                                 </div>

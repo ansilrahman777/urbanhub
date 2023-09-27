@@ -3916,6 +3916,71 @@ ol {
 }
 
 
+/* portflio */
+.portfolio-gallery:before,
+.portfolio-gallery:after {
+	position: absolute;
+	content: "";
+	left: 0;
+	top: -68px;
+	width: 459px;
+	height: 590px;
+	background-image: url("../img/portfolio-overlay.png");
+	background-repeat: no-repeat;
+	background-size: cover;
+	z-index: -1;
+}
+
+.portfolio-gallery:after {
+	top: auto;
+	left: auto;
+	right: 0;
+	bottom: -93px;
+}
+
+.portfolio-item {
+	width: 20%;
+	float: left;
+	position: relative;
+}
+
+.portfolio-item.--big {
+	width: 40%;
+}
+
+.portfolio-item.--big.--wide {
+	width: 60%;
+}
+
+.portfolio-item .portfolio-view {
+	position: absolute;
+	width: 100%;
+	height: 80%;
+	top: 10%;
+	font-size: 24px;
+	color: #fff;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	background: #161024;
+	opacity: 0;
+	-webkit-transition: all 0.3s ease 0s;
+	transition: all 0.3s ease 0s;
+}
+
+.portfolio-item:hover .portfolio-view {
+	opacity: 1;
+	top: 0;
+	height: 100%;
+}
+
+
 
 
 

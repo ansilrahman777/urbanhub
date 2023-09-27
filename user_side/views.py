@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseRedirect
 from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProducts,Payment
 from django.contrib import messages,auth
 from .forms import SignupForm,ProfileEditForm
@@ -9,7 +9,9 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.cache import cache_control
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
-import requests
+from django.utils import timezone
+import requests,random
+
 #activation
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -588,18 +590,22 @@ def user_add_address(request):
         )
         if len(phone) != 10:
             messages.warning(request,'Mobile number must be 10 digits !')
-            return redirect('user_address')
+            referer = request.META.get('HTTP_REFERER')
+            return HttpResponseRedirect(referer)
         if len(pin) > 6:
             messages.warning(request,'Invalid Pincode !')
-            return redirect('user_address')
+            referer = request.META.get('HTTP_REFERER')
+            return HttpResponseRedirect(referer)
         if not pin.isdigit():
             messages.warning(request, 'Invalid Pincode! Please enter a numeric PIN code.')
-            return redirect('user_address')
+            referer = request.META.get('HTTP_REFERER')
+            return HttpResponseRedirect(referer)
         
     
         address.save()
         messages.success(request,'Address added')
-        return redirect('/user_address')
+        referer = request.META.get('HTTP_REFERER')
+        return HttpResponseRedirect(referer)
 
     state_choices = Address.STATE_CHOICES  
     context = {
@@ -640,18 +646,24 @@ def user_edit_address(request,id):
 
         if len(phone) != 10:
             messages.warning(request,'Mobile number must be 10 digits !')
-            return redirect('user_profile')
+            referer = request.META.get('HTTP_REFERER')
+            return HttpResponseRedirect(referer)
         if len(pin) > 6:
             messages.warning(request,'Invalid Pincode !')
-            return redirect('user_profile')
+            referer = request.META.get('HTTP_REFERER')
+            return HttpResponseRedirect(referer)
         if not pin.isdigit():
             messages.warning(request, 'Invalid Pincode! Please enter a numeric PIN code.')
-            return redirect('user_address')
+            referer = request.META.get('HTTP_REFERER')
+            return HttpResponseRedirect(referer)
         
         save_address .save()
-        return redirect('user_address')
+        referer = request.META.get('HTTP_REFERER')
 
-    return render(request,'user_temp/user_address.html')
+    return HttpResponseRedirect(referer or '/user_address/')
+
+
+    
 @login_required(login_url='user_login')
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_remove_address(request, id):
@@ -659,29 +671,15 @@ def user_remove_address(request, id):
         address = Address.objects.get(id=id)
         address.delete()
         messages.success(request, 'Address removed successfully.')
+        referer = request.META.get('HTTP_REFERER')
+        
     except Address.DoesNotExist:
         messages.error(request, 'Address not found.')
+        referer = request.META.get('HTTP_REFERER')
     
-    return redirect('user_address')
+    return HttpResponseRedirect(referer or '/user_address/')
 
-@login_required(login_url='user_login')
-@cache_control(no_cache=True,must_revalidate=True,no_store=True)
-def user_default_address(request,id):
-    address = get_object_or_404(Address, id=id)
-    addresses=Address.objects.filter().exclude(id=id)
-    if address.is_default:
-        address.is_default=False
-        for add in addresses:
-            add.is_default=True
-            address.save()
-    else:
-        address.is_default=True
-        for add in addresses:
-            add.is_default=False
-            add.save()
-    address.save()
 
-    return render(request,'user_temp/user_address.html')
 
 # ----------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------checkout--------------------------------------------------------
@@ -689,8 +687,9 @@ def user_default_address(request,id):
 
 @login_required(login_url='user_login')
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
-def user_checkout(request,total=0,quantity=0,cart_items=None):
+def user_shipping(request,total=0,quantity=0,cart_items=None):
 
+    state_choices = Address.STATE_CHOICES 
     addresses = Address.objects.filter(user_id=request.user.id)
     try:
         if request.user.is_authenticated:
@@ -703,26 +702,124 @@ def user_checkout(request,total=0,quantity=0,cart_items=None):
             quantity += cart_item.quantity
     except ObjectDoesNotExist:
         pass
-
+    
     context={
         'total':total,
         'quantity':quantity,
         'cart_items':cart_items,
         'addresses': addresses,
+        'state_choices': state_choices,
+    }
+    return render(request,'user_temp/user_shipping.html',context)
+
+
+@login_required(login_url='user_login')
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def user_checkout(request,total=0,quantity=0,cart_items=None):
+    state_choices = Address.STATE_CHOICES 
+    addresses = Address.objects.filter(user_id=request.user.id)
+
+    default_address = Address.objects.filter(user_id=request.user.id, is_default=True).first()
+    if not default_address:
+        messages.error(request, "Please provide a default address.")
+        return redirect('user_shipping')
+    try:
+        if request.user.is_authenticated:
+            cart_items=CartItem.objects.filter(user=request.user, is_active=True)
+        else:  
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_items=CartItem.objects.filter(cart=cart, is_active=True)
+        for cart_item in cart_items:
+            total +=(cart_item.product.price * cart_item.quantity)
+            quantity += cart_item.quantity
+    except ObjectDoesNotExist:
+        pass
+    
+    context={
+        'total':total,
+        'quantity':quantity,
+        'cart_items':cart_items,
+        'addresses': addresses,
+        'state_choices': state_choices,
     }
 
     return render(request,'user_temp/user_checkout.html',context)
 
 @login_required(login_url='user_login')
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
-def user_place_order(request):
-    current_user=request.user
+def user_place_order(request,total=0,quantity=0,cart_items=None):
 
+    current_user=request.user
+    addresses = Address.objects.filter(user_id=request.user.id)
     cart_items = CartItem.objects.filter(user=current_user)
+
     cart_count = cart_items.count()
     if cart_count <=0:
         return redirect('user_shop')
 
+    grand_total = 0
+    for cart_item in cart_items:
+        total += (cart_item.product.price * cart_item.quantity)
+        quantity += cart_item.quantity
+    grand_total = total
+
+    if request.method == 'POST':
+        default_address = Address.objects.filter(user_id=request.user, is_default=True).first()
+
+        if default_address:
+            current_date_time = timezone.now().strftime("%m%d%H%M%S")
+            order_number = f"UHB{current_date_time}{random.randint(10000, 99999)}"
+
+            note = request.POST.get('note')
+            total = grand_total
+            tax = grand_total
+            payment_option=request.POST.get('payment_option')
+
+            
+            order = Order(
+                user=request.user,
+                address=default_address,
+                order_number=order_number,
+                order_total=total,  
+                tax=tax, 
+                order_note=note, 
+
+            )
+           
+            order.save()
+
+        order =Order.objects.filter(user=current_user,is_ordered=False,order_number=order_number)
+        default_address = Address.objects.filter(user_id=request.user, is_default=True)
+
+        context = {
+        'order':order.first(),
+        'cart_items': cart_items,
+        'default_address': default_address,
+        'total':total,
+        }
+
+        return render(request, 'user_temp/user_payment.html', context)
+
+    return render(request,'user_temp/user_checkout.html')
+
+@login_required(login_url='user_login')
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def user_payment(request):
+
+    
+    
+    return render(request,'user_temp/user_payment.html')
 
 
-    return render(request,'user_temp/user_place_order.html')
+# ----------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------user_wishlist--------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------
+
+@login_required(login_url='user_login')
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def user_wishlist(request):
+    products = Product.objects.all().filter(is_available=True).order_by('id') 
+    context ={
+        'products':products,
+    }
+    return render(request,'user_temp/user_wishlist.html',context)

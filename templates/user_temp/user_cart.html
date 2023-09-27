@@ -35,15 +35,13 @@
         </div>
         
         <div class="row ">
-                <div class="continue__btn">
-                    <a href="/user_shop">Continue Shopping</a>
-                </div>
-                <div class="continue__btn update__btn">
-                    <a href="#"><i class="fa fa-spinner"></i> add from wishlist</a>
-                </div>
+            <div class="continue__btn">
+                <a href="/user_shop">Continue Shopping</a>
+            </div>
+            <div class="continue__btn update__btn">
+                <a href="#"><i class="fa  fa-heart"></i> add from wishlist</a>
+            </div>
         </div>
-           
-
         {% else %}
         <div class="row">
             <div class="col-lg-8">
@@ -115,7 +113,7 @@
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6">
                         <div class="continue__btn update__btn">
-                            <a href="#"><i class="fa fa-spinner"></i> add from wishlist</a>
+                            <a href="/user_wishlist"><i class="fa fa-heart"></i> add from wishlist</a>
                         </div>
                     </div>
                 </div>
@@ -134,7 +132,7 @@
                         <li>Subtotal <span>{{total}}&nbsp;&#8377;</span></li>
                         <li>Total <span>{{total}}&nbsp;&#8377;</span></li>
                     </ul>
-                    <a href="/user_checkout" class="primary-btn">Proceed to checkout</a>
+                    <a href="/user_shipping" class="primary-btn">Proceed to Shipping</a>
                 </div>
             </div>
         </div>

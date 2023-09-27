@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.urls import reverse
 from django import forms
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 
 # Create your models here.
@@ -241,14 +243,30 @@ class Address(models.Model):
     
 
     def _str_(self):
-        return self.address_id
+        return str(self.pk)
+
+    def delete(self, *args, **kwargs):
+        super(Address, self).delete(*args, **kwargs)
+
+        remaining_addresses = Address.objects.filter(user_id=self.user_id).exclude(pk=self.pk)
+        remaining_addresses_count = remaining_addresses.count()
+
+        if self.is_default and remaining_addresses_count == 0:
+            return
+
+        if remaining_addresses_count > 0:
+            last_address = remaining_addresses.order_by('-pk').first()
+            last_address.is_default = True
+            last_address.save()
 
     def save(self, *args, **kwargs):
-        if self.is_default:
-            # If the address is set as default, set all other addresses for the user as not default
-            Address.objects.filter(user_id=self.user_id).update(is_default=False)
         super(Address, self).save(*args, **kwargs)
-    
+
+        other_default_addresses = Address.objects.filter(user_id=self.user_id).exclude(pk=self.pk, is_default=True)
+
+        if self.is_default:
+            other_default_addresses.update(is_default=False)
+
 
     
 class Payment(models.Model):
