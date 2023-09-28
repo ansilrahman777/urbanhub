@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.conf import settings 
 from django.http import HttpResponse,HttpResponseRedirect
-from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProduct,Payment
+from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProduct,Payment,Wishlist
 from django.contrib import messages,auth
 from .forms import SignupForm,ProfileEditForm
 from django.contrib.auth import authenticate, login,logout
@@ -256,6 +256,7 @@ def user_reset_password(request):
 
 @never_cache
 def user_shop(request, category_slug=None):
+    user=request.user
     category = None
     products = None
     
@@ -273,11 +274,13 @@ def user_shop(request, category_slug=None):
         paged_products = paginator.get_page(page)
         product_count = products.count()
 
+    wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
 
     context = {
         'products': paged_products,
         'product_count': product_count,
-        'selected_category': category,  
+        'selected_category': category,
+        'wishlist_products': wishlist_products  
     }
 
     return render(request, 'user_temp/user_shop.html', context)
@@ -302,14 +305,18 @@ def search(request):
 
 @never_cache
 def user_product_detail(request,category_slug,product_slug):
+    user=request.user
     try:
         single_product = Product.objects.get(category__slug=category_slug,slug=product_slug)
         
     except Exception as e:
         raise e
 
+    wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
+
     context = {
         'single_product': single_product,
+        'wishlist_products':wishlist_products,
     }
     return render(request,'user_temp/user_product_detail.html',context)
 
@@ -372,7 +379,8 @@ def user_add_cart(request, product_id):
                 cart_item.variations.clear()
                 cart_item.variations.add(*product_variation)
             cart_item.save()
-        return redirect('user_cart')
+        referer = request.META.get('HTTP_REFERER')
+        return HttpResponseRedirect(referer)
     #if user is not authenticated (same code for both)  
     else:
         product_variation=[]
@@ -430,7 +438,8 @@ def user_add_cart(request, product_id):
                 cart_item.variations.clear()
                 cart_item.variations.add(*product_variation)
             cart_item.save()
-        return redirect('user_cart')
+        referer = request.META.get('HTTP_REFERER')
+        return HttpResponseRedirect(referer)
 
 
 def user_remove_cart(request, product_id,cart_item_id):
@@ -814,7 +823,7 @@ def user_payment(request,order_number):
     try:
         order = Order.objects.get(order_number=order_number, user=current_user, is_ordered=False)
     except Order.DoesNotExist:
-        return redirect('user_checkout')
+        return redirect('user_cart')
     
     total_amount = order.order_total 
     transaction_id = request.GET.get('transactionId')
@@ -850,12 +859,88 @@ def user_payment(request,order_number):
             ordered=True,
         )
         order_product.save()
+        cart_item = CartItem.objects.get(id=cart_item.id)
+        product_variation = cart_item.variations.all()
+        order_product = OrderProduct.objects.get(id=order_product.id)
+        order_product.variations.set(product_variation)
+        order_product.save()
 
-    # cart_items.delete()
+        product = Product.objects.get(id=cart_item.product.id)
+        product.quantity -= cart_item.quantity 
+        product.save()
 
-    # context = {'order': order}
+    cart_items.delete()
 
-    return render(request,'user_temp/user_order_confirmed.html')
+    context = {
+        'order': order,
+        'payment': order.payment,
+        'address': order.address,  
+    }
+
+    return render(request,'user_temp/user_order_confirmed.html',context)
+
+def user_cash_on_delivery(request, order_number):
+    current_user = request.user
+    try:
+        order = Order.objects.get(order_number=order_number, user=current_user, is_ordered=False)
+    except Order.DoesNotExist:
+        return redirect('user_cart')
+    
+    total_amount = order.order_total 
+   
+    payment = Payment(
+        user=current_user,
+        payment_id="Cash On Delivery",
+        payment_method="Cash On Delivery", 
+        amount_paid=total_amount, 
+        status="Not Paid")
+    payment.save()
+
+    order.is_ordered = True
+    order.order_number = order_number
+    order.payment = payment
+    order.save()
+
+    cart_items = CartItem.objects.filter(user=current_user)
+    for cart_item in cart_items:
+        order_product = OrderProduct(
+            order=order,
+            payment=payment,
+            user=current_user,
+            product=cart_item.product,
+            quantity=cart_item.quantity,
+            product_price=cart_item.product.price,
+            ordered=True,
+        )
+        order_product.save()
+        cart_item = CartItem.objects.get(id=cart_item.id)
+        product_variation = cart_item.variations.all()
+        order_product = OrderProduct.objects.get(id=order_product.id)
+        order_product.variations.set(product_variation)
+        order_product.save()
+
+        product = Product.objects.get(id=cart_item.product.id)
+        product.quantity -= cart_item.quantity 
+        product.save()
+
+    cart_items.delete()
+
+    context = {
+        'order': order,
+        'payment': order.payment,
+        'address': order.address,  
+    }
+
+    return render(request,'user_temp/user_order_confirmed.html',context)
+
+def user_order_details(request):
+    orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+
+    context={
+        'orders':orders
+    }
+
+    return render(request,'user_temp/user_order_details.html',context)
 
 # ----------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------user_wishlist--------------------------------------------------------
@@ -864,8 +949,44 @@ def user_payment(request,order_number):
 @login_required(login_url='user_login')
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_wishlist(request):
-    products = Product.objects.all().filter(is_available=True).order_by('id') 
-    context ={
-        'products':products,
+    user = request.user
+
+    wishlist_items = Wishlist.objects.filter(user=user)
+    wishlist_products = [item.product for item in wishlist_items]
+
+    
+    context={
+        'wishlist_products': wishlist_products
     }
     return render(request,'user_temp/user_wishlist.html',context)
+
+
+@login_required(login_url='user_login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def user_add_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    user = request.user
+
+    if not Wishlist.objects.filter(user=user, product=product).exists():
+        Wishlist.objects.create(user=user, product=product)
+        messages.success(request, 'Product added to wishlist.')
+    else:
+        messages.warning(request, 'Product is already in the wishlist.')
+
+    referer = request.META.get('HTTP_REFERER')
+    return HttpResponseRedirect(referer or '/user_wishlist/')
+
+@login_required(login_url='user_login')
+def user_remove_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    user = request.user
+
+    try:
+        wishlist_item = Wishlist.objects.get(user=user, product=product)
+        wishlist_item.delete()
+        messages.success(request, 'Product removed from wishlist.')
+    except Wishlist.DoesNotExist:
+        messages.warning(request, 'Product is not in the wishlist.')
+
+    referer = request.META.get('HTTP_REFERER')
+    return HttpResponseRedirect(referer or '/user_wishlist/')

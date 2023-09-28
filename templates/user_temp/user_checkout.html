@@ -108,13 +108,13 @@
                                 <div class="checkout__order__products">Product <span>Total</span></div>
                                 {% for cart_item in cart_items %}
                                 <ul class="checkout__total__products">
-                                    <li>{{cart_item.product.product_name}}<span>{{cart_item.sub_total}}</span></li>
+                                    <li>{{cart_item.product.product_name}}<span>&#8377;&nbsp;{{cart_item.sub_total}}</span></li>
                                     
                                 </ul>
                                 {% endfor %}
                                 <ul class="checkout__total__all">
-                                    <li>Subtotal <span>{{total}}</span></li>
-                                    <li>Total <span>{{total}}</span></li>
+                                    <li>Subtotal <span>&#8377;&nbsp;{{total}}</span></li>
+                                    <li>Total <span>&#8377;&nbsp;{{total}}</span></li>
                                 </ul>
                                 {% comment %} <h4 class="order__title">Payment Method</h4>
                                 <div class="checkout__input__checkbox">

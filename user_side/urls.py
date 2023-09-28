@@ -39,8 +39,14 @@ urlpatterns = [
     path('user_checkout',views.user_checkout,name='user_checkout'),
     path('user_place_order',views.user_place_order,name='user_place_order'),
     path('user_payment/<str:order_number>/', views.user_payment, name='user_payment'),
+    path('user_cash_on_delivery/<str:order_number>/', views.user_cash_on_delivery, name='user_cash_on_delivery'),
 
-    path('user_wishlist',views.user_wishlist,name='user_wishlist'),
+    path('user_order_details',views.user_order_details,name='user_order_details'),
+
+    path('user_wishlist/', views.user_wishlist, name='user_wishlist'),
+    path('user_add_wishlist/<int:product_id>/', views.user_add_wishlist, name='user_add_wishlist'),
+    path('user_remove_wishlist/<int:product_id>/', views.user_remove_wishlist, name='user_remove_wishlist'),
+
 
 
  

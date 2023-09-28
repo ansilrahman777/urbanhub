@@ -83,13 +83,14 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for order in orders %}
                                 <tr>
-                                    <td>1233</td>
-                                    <td><b>Esther Howard</b></td>
-                                    <td>123456789</td>
-                                    <td>$12.00</td>
-                                    <td><span class="badge rounded-pill alert-danger">Canceled</span></td>
-                                    <td>03.07.2020</td>
+                                    <td>{{order.order_number}}</td>
+                                    <td><b>{{order.address.first_name | capfirst}}</b></td>
+                                    <td>{{order.address.phone}}</td>
+                                    <td>{{order.order_total}}</td>
+                                    <td><span class="badge rounded-pill alert-danger">{{order.status}}</span></td>
+                                    <td>{{order.created_at}}</td>
                                     <td>
                                         <div class="dropdown">
                                         <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
@@ -100,23 +101,7 @@
                                         </div> <!-- dropdown //end -->
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>1233</td>
-                                    <td><b>Esther Howard</b></td>
-                                    <td>123456789</td>
-                                    <td>$12.00</td>
-                                    <td><span class="badge rounded-pill alert-success">Recived</span></td>
-                                    <td>03.07.2020</td>
-                                    <td>
-                                        <div class="dropdown">
-                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">Download Invoice</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
-                                            </div>
-                                        </div> <!-- dropdown //end -->
-                                    </td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div> <!-- table-responsive //end -->

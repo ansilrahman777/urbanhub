@@ -23,17 +23,27 @@
 
     <!-- Shop Section Begin -->
     <section class="shop spad">
+        {% for messages in messages  %}
+        <div class="alert alert-{{messages.tags}} alert-dismissible fade show" role="alert">
+          <strong></strong>{{messages}}
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true" >&times;</spam></button>
+        </div>
+        {% endfor %}
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
                     <div class="row">
-                        {% for product in products %}
+                        {% for product in wishlist_products %}
                             {% if not product.soft_deleted %}
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="product__item">
                                     <div class="product__item__pic set-bg" data-setbg="{{product.product_images.url}}">
                                         <ul class="product__hover">
-                                            <li><a href="#"><img src="{% static 'img/icon/heart.png '%}" alt=""></a></li>
+                                            {% if product in wishlist_products %}
+                                            <li><a href="{% url 'user_remove_wishlist' product.id %}"><img src="{% static 'img/icon/redheart.png '%}" alt=""></a></li>
+                                            {% else %}
+                                            <li><a href="{% url 'user_add_wishlist' product.id %}"><img src="{% static 'img/icon/heart.png '%}" alt=""></a></li>
+                                            {% endif %}
                                             <li><a href="{{ product.get_url }}"><img src="{% static 'img/icon/eye.png' %}" alt=""></a></li>
                                         </ul>
                                     </div>

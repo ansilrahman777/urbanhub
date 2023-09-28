@@ -73,8 +73,8 @@
                                                     <br>
                                                 {% endfor %}
                                             {% endif %}
+                                            &#8377;&nbsp;{{cart_item.product.price}}&nbsp;
                                         </p>
-                                        <h5>{{cart_item.product.price}}&nbsp;&#8377;</h5>
                                     </div>
                                 </td>
                                 <td class="quantity__item">
@@ -129,8 +129,8 @@
                 <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>
-                        <li>Subtotal <span>{{total}}&nbsp;&#8377;</span></li>
-                        <li>Total <span>{{total}}&nbsp;&#8377;</span></li>
+                        <li>Subtotal <span>&#8377;&nbsp;{{total}}</span></li>
+                        <li>Total <span>&#8377;&nbsp;{{total}}</span></li>
                     </ul>
                     <a href="/user_shipping" class="primary-btn">Proceed to Shipping</a>
                 </div>

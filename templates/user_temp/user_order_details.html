@@ -1,0 +1,103 @@
+{% extends 'user_temp/base.html' %} 
+{% load static %} 
+{% block title%}OEDER DETAILS{%endblock title %}
+{% block body %}
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb__text">
+          <h4>{{request.user.first_name |capfirst}}</h4>
+          <div class="breadcrumb__links">
+            <a href="/">Home</a>
+            <span>Profile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<div class="container mt-5">
+    {% for messages in messages  %}
+        <div class="alert alert-{{messages.tags}} alert-dismissible fade show" role="alert">
+          <strong></strong>{{messages}}
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true" >&times;</spam></button>
+        </div>
+      {% endfor %}
+  <div class="row">
+    <div class="col-lg-4 pb-5">
+      <!-- Account Sidebar-->
+      <div class="author-card pb-3">
+        <div
+          class="author-card-cover"
+          style="background-image: url('{% static 'img/about/about-us.jpg' %}')"
+        >
+          <a
+            class="btn btn-style-1 btn-white btn-sm"
+            href="#"
+            data-toggle="tooltip"
+            title=""
+            data-original-title="You currently have 290 Reward points to spend"
+          >
+            <i class="fa fa-award text-md"></i>&nbsp;Active
+          </a>
+        </div>
+        <div class="author-card-profile">
+          <div class="author-card-avatar">
+            <img src="{% static 'img/about/testimonial-author.jpg' %}" alt="" />
+          </div>
+          <div class="author-card-details">
+            <h5 class="author-card-name text-lg">{{request.user.username}}</h5>
+            <span class="author-card-position"
+              >Joined {{request.user.date_joined}}</span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="wizard">
+        <nav class="list-group list-group-flush">
+            <a class="list-group-item " href="user_profile"><i class="fe-icon-user text-muted"></i>Profile Settings</a>
+            <a class="list-group-item " href="user_address"><i class="fe-icon-user text-muted"></i>Address</a>
+            <a class="list-group-item active " href="#"><i class="fe-icon-user text-muted"></i>Order details</a>
+            <a class="list-group-item " href="/user_change_password"><i class="fe-icon-user text-muted"></i>Change Password</a>
+            <hr>
+            <a class="list-group-item " href="/user_logout"><i class="fe-icon-user text-muted"></i>Logout</a>
+        </nav>
+      </div>
+    </div>
+    <!-- Profile Settings-->
+    <div class="col-lg-8 pb-5">
+    <h2>My Orders</h2>
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">Order #</th>
+            <th scope="col">Billing Name</th>
+            <th scope="col">Order Amount</th>
+            <th scope="col">Order Date</th>
+            <th scope="col">Payment Method</th>
+            <th scope="col">Order Status</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            <tr>
+            <td>{{order.order_number}}</td>
+            <td>{{order.address.first_name | capfirst}}</td>
+            <td>{{order.order_total}}</td>
+            <td>{{order.created_at}}</td>
+            <td>{{order.payment.payment_method}}</td>
+            <td>{{order.status}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock body %}

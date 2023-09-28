@@ -461,7 +461,7 @@
                                                 <h6 class="text-dark">{{cart_item.quantity}}</h6>
                                             </div>                                    
                                         </td>
-                                        <td class="cart__price">{{cart_item.sub_total}}</td>
+                                        <td class="cart__price">&#8377;&nbsp;{{cart_item.sub_total}}</td>
                                         
                                     </tr>
                                     {% endfor %}
@@ -470,8 +470,8 @@
                             <div class="cart__total">
                                 <h6>Cart total</h6>
                                 <ul>
-                                    <li>Subtotal <span>{{total}}&nbsp;&#8377;</span></li>
-                                    <li>Total <span>{{total}}&nbsp;&#8377;</span></li>
+                                    <li>Subtotal <span>&#8377;&nbsp;{{total}}</span></li>
+                                    <li>Total <span>&#8377;&nbsp;{{total}}</span></li>
                                 </ul>
                             </div>
                             <a href="/user_checkout " class="primary-btn">Proceed to checkout</a>

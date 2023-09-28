@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
-from user_side.models import Product,Category,User
+from user_side.models import Product,Category,User,Order,Payment,OrderProduct
 from django.contrib import messages,auth
 from user_side.forms import SignupForm
 from django.contrib.auth import authenticate, login,logout
@@ -366,7 +366,13 @@ def admin_banners(request):
     return render(request,'admin_temp/admin_banners.html')
 
 def admin_orders(request):
-    return render(request,'admin_temp/admin_orders.html')
+    orders = Order.objects.all()
+
+    context={
+        'orders':orders
+    }
+    return render(request,'admin_temp/admin_orders.html',context)
 
 def admin_coupons(request):
     return render(request,'admin_temp/admin_coupons.html')
+
