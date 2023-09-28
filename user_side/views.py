@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect, get_object_or_404
+from django.conf import settings 
 from django.http import HttpResponse,HttpResponseRedirect
-from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProducts,Payment
+from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProduct,Payment
 from django.contrib import messages,auth
 from .forms import SignupForm,ProfileEditForm
 from django.contrib.auth import authenticate, login,logout
@@ -11,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 from django.utils import timezone
 import requests,random
+import razorpay
 
 #activation
 from django.contrib.sites.shortcuts import get_current_site
@@ -749,6 +751,7 @@ def user_checkout(request,total=0,quantity=0,cart_items=None):
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_place_order(request,total=0,quantity=0,cart_items=None):
 
+   
     current_user=request.user
     addresses = Address.objects.filter(user_id=request.user.id)
     cart_items = CartItem.objects.filter(user=current_user)
@@ -785,9 +788,7 @@ def user_place_order(request,total=0,quantity=0,cart_items=None):
                 order_note=note, 
 
             )
-           
             order.save()
-
         order =Order.objects.filter(user=current_user,is_ordered=False,order_number=order_number)
         default_address = Address.objects.filter(user_id=request.user, is_default=True)
 
@@ -799,17 +800,62 @@ def user_place_order(request,total=0,quantity=0,cart_items=None):
         }
 
         return render(request, 'user_temp/user_payment.html', context)
+    else:
+        return redirect('user_checkout')
 
     return render(request,'user_temp/user_checkout.html')
 
+
 @login_required(login_url='user_login')
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
-def user_payment(request):
+def user_payment(request,order_number):
 
+    current_user = request.user
+    try:
+        order = Order.objects.get(order_number=order_number, user=current_user, is_ordered=False)
+    except Order.DoesNotExist:
+        return redirect('user_checkout')
     
-    
-    return render(request,'user_temp/user_payment.html')
+    total_amount = order.order_total 
+    transaction_id = request.GET.get('transactionId')
+    razorpay_client = razorpay.Client(auth=(settings.KEY, settings.SECRET))
+    payment = razorpay_client.payment.fetch(transaction_id)
+    payment_status = payment['status']
+    transaction_id = payment['id']
 
+
+    payment = Payment(
+        user=current_user,
+        payment_id=transaction_id,
+        payment_method="Razorpay",
+        status=payment_status,
+        amount_paid=total_amount,
+    )
+    payment.save()
+
+    order.is_ordered = True
+    order.order_number = order_number
+    order.payment = payment
+    order.save()
+
+    cart_items = CartItem.objects.filter(user=current_user)
+    for cart_item in cart_items:
+        order_product = OrderProduct(
+            order=order,
+            payment=payment,
+            user=current_user,
+            product=cart_item.product,
+            quantity=cart_item.quantity,
+            product_price=cart_item.product.price,
+            ordered=True,
+        )
+        order_product.save()
+
+    # cart_items.delete()
+
+    # context = {'order': order}
+
+    return render(request,'user_temp/user_order_confirmed.html')
 
 # ----------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------user_wishlist--------------------------------------------------------

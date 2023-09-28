@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  Category ,User ,Product , Cart,CartItem,Variation,TempUser,Address,Order,OrderProducts,Payment
+from .models import  Category ,User ,Product , Cart,CartItem,Variation,TempUser,Address,Order,OrderProduct,Payment
 from django.contrib.auth.admin import UserAdmin
 
 
@@ -34,6 +34,15 @@ class CartItemAdmin(admin.ModelAdmin):
 class AddressAdmin(admin.ModelAdmin):
     list_display=('first_name','last_name','address_line_1','city','state','is_default')
 
+class OrderProductInline(admin.TabularInline):
+    model = OrderProduct
+    readonly_fields =('user','order','payment','product','product_price','ordered','quantity',)
+    extra=0
+
+class OrderAdmin(admin.ModelAdmin):
+    list_display=('user','order_number','payment','address','order_total','is_ordered','status')
+    inlines =[OrderProductInline]
+
 admin.site.register(Category,CategoryAdmin)
 admin.site.register(User,AccountAdmin)
 admin.site.register(TempUser)
@@ -42,6 +51,6 @@ admin.site.register(Product,ProductAdmin)
 admin.site.register(Cart,CartAdmin)
 admin.site.register(CartItem,CartItemAdmin)
 admin.site.register(Variation,VariationAdmin)
-admin.site.register(Order)
-admin.site.register(OrderProducts)
+admin.site.register(Order,OrderAdmin)
+admin.site.register(OrderProduct)
 admin.site.register(Payment)

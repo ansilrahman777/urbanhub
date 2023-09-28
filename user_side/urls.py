@@ -38,7 +38,7 @@ urlpatterns = [
     path('user_shipping',views.user_shipping,name='user_shipping'),
     path('user_checkout',views.user_checkout,name='user_checkout'),
     path('user_place_order',views.user_place_order,name='user_place_order'),
-    path('user_payment',views.user_payment,name='user_payment'),
+    path('user_payment/<str:order_number>/', views.user_payment, name='user_payment'),
 
     path('user_wishlist',views.user_wishlist,name='user_wishlist'),
 

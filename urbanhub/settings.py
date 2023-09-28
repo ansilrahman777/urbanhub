@@ -161,3 +161,9 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'anzzfcb777@gmail.com'
 EMAIL_HOST_PASSWORD ='ensrlcqtsjrabxcl'
 EMAIL_USE_TLS = True
+
+# razorpay
+
+KEY = 'rzp_test_QLdX2Sorqhxv6w'
+SECRET ='Uw7JwJDvXMVSZ96vLZQcfgZY'
+
