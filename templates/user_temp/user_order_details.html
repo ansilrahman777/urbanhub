@@ -78,9 +78,10 @@
             <th scope="col">Order #</th>
             <th scope="col">Billing Name</th>
             <th scope="col">Order Amount</th>
-            <th scope="col">Order Date</th>
+            {% comment %} <th scope="col">Order Date</th> {% endcomment %}
             <th scope="col">Payment Method</th>
             <th scope="col">Order Status</th>
+            <th scope="col">Change Status</th>
           </tr>
         </thead>
         <tbody>
@@ -89,9 +90,18 @@
             <td>{{order.order_number}}</td>
             <td>{{order.address.first_name | capfirst}}</td>
             <td>{{order.order_total}}</td>
-            <td>{{order.created_at}}</td>
+            {% comment %} <td>{{order.created_at}}</td> {% endcomment %}
             <td>{{order.payment.payment_method}}</td>
             <td>{{order.status}}</td>
+            <td>
+                    {% if order.status == 'Accepted' %}
+                        <a href="{% url 'user_update_order_status' order.id 'Cancelled' %}" class="btn btn-danger">Cancel</a>
+                    {% elif order.status == 'Delivered' %}
+                        <a href="{% url 'user_update_order_status' order.id 'Cancelled' %}" class="btn btn-warning">Return</a>
+                    {% elif order.status == 'Cancelled' %}
+                        Order Cancelled
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>

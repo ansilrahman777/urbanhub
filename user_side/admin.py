@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  Category ,User ,Product , Cart,CartItem,Variation,TempUser,Address,Order,OrderProduct,Payment,Wishlist
+from .models import  Category ,User ,Product , Cart,CartItem,Variation,TempUser,Address,Order,OrderProduct,Payment,Wishlist,Coupons,UserCoupons
 from django.contrib.auth.admin import UserAdmin
 
 
@@ -42,6 +42,8 @@ class OrderProductInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display=('user','order_number','payment','address','order_total','is_ordered','status')
     inlines =[OrderProductInline]
+class CouponsAdmin(admin.ModelAdmin):
+    list_display=('coupon_code','description','minimum_amount','discount','is_expired','valid_from','valid_to')
 
 admin.site.register(Category,CategoryAdmin)
 admin.site.register(User,AccountAdmin)
@@ -55,3 +57,5 @@ admin.site.register(Order,OrderAdmin)
 admin.site.register(OrderProduct)
 admin.site.register(Payment)
 admin.site.register(Wishlist)
+admin.site.register(Coupons,CouponsAdmin)
+admin.site.register(UserCoupons)

@@ -23,8 +23,8 @@ urlpatterns = [
 
     path('user_cart',views.user_cart,name='user_cart'),
     path('user_add_cart/<int:product_id>/',views.user_add_cart,name='user_add_cart'),
-    path('user_remove_cart/<int:product_id>/<int:cart_item_id>',views.user_remove_cart,name='user_remove_cart'),
-    path('user_remove_cart_item/<int:product_id>/<int:cart_item_id>',views.user_remove_cart_item,name='user_remove_cart_item'),
+    path('user_remove_cart/<int:product_id>/<int:cart_item_id>/', views.user_remove_cart, name='user_remove_cart'),
+    path('user_remove_cart_item/<int:product_id>/<int:cart_item_id>/', views.user_remove_cart_item, name='user_remove_cart_item'),
 
     path('user_profile',views.user_profile,name='user_profile'),
     path('user_profile_edit',views.user_profile_edit,name='user_profile_edit'),
@@ -42,10 +42,13 @@ urlpatterns = [
     path('user_cash_on_delivery/<str:order_number>/', views.user_cash_on_delivery, name='user_cash_on_delivery'),
 
     path('user_order_details',views.user_order_details,name='user_order_details'),
+    path('user_update_order_status/<int:order_id>/<str:new_status>/', views.user_update_order_status, name='user_update_order_status'),
+
 
     path('user_wishlist/', views.user_wishlist, name='user_wishlist'),
     path('user_add_wishlist/<int:product_id>/', views.user_add_wishlist, name='user_add_wishlist'),
     path('user_remove_wishlist/<int:product_id>/', views.user_remove_wishlist, name='user_remove_wishlist'),
+    path('user_apply_coupon', views.user_apply_coupon, name='user_apply_coupon'),
 
 
 

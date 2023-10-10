@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect, get_object_or_404
 from django.conf import settings 
 from django.http import HttpResponse,HttpResponseRedirect
-from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProduct,Payment,Wishlist
+from .models import Product,Category,User,Cart,CartItem,Variation,Address,Order,OrderProduct,Payment,Wishlist,Coupons,UserCoupons
 from django.contrib import messages,auth
 from .forms import SignupForm,ProfileEditForm
 from django.contrib.auth import authenticate, login,logout
@@ -13,6 +13,7 @@ from django.core.paginator import EmptyPage,PageNotAnInteger,Paginator
 from django.utils import timezone
 import requests,random
 import razorpay
+from django.http import JsonResponse
 
 #activation
 from django.contrib.sites.shortcuts import get_current_site
@@ -274,13 +275,15 @@ def user_shop(request, category_slug=None):
         paged_products = paginator.get_page(page)
         product_count = products.count()
 
-    wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
+    if user.is_authenticated:
+        wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
+        context = {
+        'wishlist_products': wishlist_products }
 
     context = {
         'products': paged_products,
         'product_count': product_count,
         'selected_category': category,
-        'wishlist_products': wishlist_products  
     }
 
     return render(request, 'user_temp/user_shop.html', context)
@@ -312,11 +315,13 @@ def user_product_detail(request,category_slug,product_slug):
     except Exception as e:
         raise e
 
-    wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
-
+    if user.is_authenticated:
+        wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
+        context = {
+        'wishlist_products': wishlist_products }
+        
     context = {
         'single_product': single_product,
-        'wishlist_products':wishlist_products,
     }
     return render(request,'user_temp/user_product_detail.html',context)
 
@@ -474,27 +479,60 @@ def user_remove_cart_item(request, product_id,cart_item_id):
     cart_item.delete()
 
     return redirect('user_cart')
+def user_cart(request, total=0, quantity=0, cart_items=None):
 
-def user_cart(request,total=0,quantity=0,cart_items=None):
+    
     try:
         if request.user.is_authenticated:
-            cart_items=CartItem.objects.filter(user=request.user, is_active=True)
+            cart_items = CartItem.objects.filter(user=request.user, is_active=True)
         else:  
             cart = Cart.objects.get(cart_id=_cart_id(request))
-            cart_items=CartItem.objects.filter(cart=cart, is_active=True)
+            cart_items = CartItem.objects.filter(cart=cart, is_active=True)
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
     except Cart.DoesNotExist:
         pass
 
-    context={
-        'total':total,
-        'quantity':quantity,
-        'cart_items':cart_items,
+    grand_total = total
+    coupons = Coupons.objects.all()
+    
+    applied_coupon_code = request.session.get('applied_coupon_code')
+    applied_coupon_discount = request.session.get('applied_coupon_discount')
+    
+
+    if applied_coupon_code and applied_coupon_discount:
+        applied_coupon = Coupons.objects.get(coupon_code=applied_coupon_code)
+        
+        if applied_coupon.is_expired:
+            request.session.pop('applied_coupon_code', None)
+            request.session.pop('applied_coupon_discount', None)
+        elif total < applied_coupon.minimum_amount:
+            request.session.pop('applied_coupon_code', None)
+            request.session.pop('applied_coupon_discount', None)
+        else:
+            grand_total = total - applied_coupon_discount
+    else:
+        applied_coupon_discount = 0
+
+    if 'remove_coupon' in request.GET:
+        request.session.pop('applied_coupon_code', None)
+        request.session.pop('applied_coupon_discount', None)
+        return redirect('user_cart')
+
+    context = {
+        'total': total,
+        'grand_total': grand_total,
+        'quantity': quantity,
+        'cart_items': cart_items,
+        'coupons': coupons,
+        'applied_coupon_code': applied_coupon_code,
+        'applied_coupon_discount': applied_coupon_discount,
     }
 
-    return render(request,'user_temp/user_cart.html',context)
+    return render(request, 'user_temp/user_cart.html', context)
+
+
 
 # ----------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------profile-----------------------------------------------------
@@ -713,10 +751,24 @@ def user_shipping(request,total=0,quantity=0,cart_items=None):
             quantity += cart_item.quantity
     except ObjectDoesNotExist:
         pass
+
+    coupons = Coupons.objects.all()
     
-    context={
-        'total':total,
-        'quantity':quantity,
+    applied_coupon_code = request.session.get('applied_coupon_code')
+    applied_coupon_discount = request.session.get('applied_coupon_discount')
+    
+
+    if applied_coupon_code and applied_coupon_discount:
+        grand_total = total - applied_coupon_discount
+    else:
+        applied_coupon_discount = 0
+        grand_total = total
+
+
+    context = {
+        'total': total,
+        'grand_total': grand_total,
+        'applied_coupon_discount':applied_coupon_discount,
         'cart_items':cart_items,
         'addresses': addresses,
         'state_choices': state_choices,
@@ -745,9 +797,24 @@ def user_checkout(request,total=0,quantity=0,cart_items=None):
             quantity += cart_item.quantity
     except ObjectDoesNotExist:
         pass
+
+    coupons = Coupons.objects.all()
+    
+    applied_coupon_code = request.session.get('applied_coupon_code')
+    applied_coupon_discount = request.session.get('applied_coupon_discount')
+    
+    
+
+    if applied_coupon_code and applied_coupon_discount:
+        grand_total = total - applied_coupon_discount
+    else:
+        applied_coupon_discount = 0
+        grand_total = total
     
     context={
         'total':total,
+        'grand_total': grand_total,
+        'applied_coupon_discount':applied_coupon_discount,
         'quantity':quantity,
         'cart_items':cart_items,
         'addresses': addresses,
@@ -760,7 +827,6 @@ def user_checkout(request,total=0,quantity=0,cart_items=None):
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_place_order(request,total=0,quantity=0,cart_items=None):
 
-   
     current_user=request.user
     addresses = Address.objects.filter(user_id=request.user.id)
     cart_items = CartItem.objects.filter(user=current_user)
@@ -774,6 +840,17 @@ def user_place_order(request,total=0,quantity=0,cart_items=None):
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
     grand_total = total
+
+    coupons = Coupons.objects.all()
+    
+    applied_coupon_code = request.session.get('applied_coupon_code')
+    applied_coupon_discount = request.session.get('applied_coupon_discount')
+    
+    if applied_coupon_code and applied_coupon_discount:
+        grand_total = total - applied_coupon_discount
+    else:
+        applied_coupon_discount = 0
+        grand_total = total
 
     if request.method == 'POST':
         default_address = Address.objects.filter(user_id=request.user, is_default=True).first()
@@ -847,6 +924,20 @@ def user_payment(request,order_number):
     order.payment = payment
     order.save()
 
+    applied_coupon_code = request.session.get('applied_coupon_code')
+
+    if applied_coupon_code:
+        try:
+            coupon = Coupons.objects.get(coupon_code=applied_coupon_code)
+            
+            if not UserCoupons.objects.filter(coupon=coupon, user=current_user, is_used=True).exists():
+                user_coupon = UserCoupons.objects.create(user=current_user, coupon=coupon, is_used=True)
+                request.session.pop('applied_coupon_code', None)
+                request.session.pop('applied_coupon_discount', None)
+        except Coupons.DoesNotExist:
+            pass
+
+
     cart_items = CartItem.objects.filter(user=current_user)
     for cart_item in cart_items:
         order_product = OrderProduct(
@@ -879,6 +970,8 @@ def user_payment(request,order_number):
 
     return render(request,'user_temp/user_order_confirmed.html',context)
 
+    
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def user_cash_on_delivery(request, order_number):
     current_user = request.user
     try:
@@ -900,6 +993,18 @@ def user_cash_on_delivery(request, order_number):
     order.order_number = order_number
     order.payment = payment
     order.save()
+    applied_coupon_code = request.session.get('applied_coupon_code')
+
+    if applied_coupon_code:
+        try:
+            coupon = Coupons.objects.get(coupon_code=applied_coupon_code)
+            
+            if not UserCoupons.objects.filter(coupon=coupon, user=current_user, is_used=True).exists():
+                user_coupon = UserCoupons.objects.create(user=current_user, coupon=coupon, is_used=True)
+                request.session.pop('applied_coupon_code', None)
+                request.session.pop('applied_coupon_discount', None)   
+        except Coupons.DoesNotExist:
+            pass
 
     cart_items = CartItem.objects.filter(user=current_user)
     for cart_item in cart_items:
@@ -941,6 +1046,24 @@ def user_order_details(request):
     }
 
     return render(request,'user_temp/user_order_details.html',context)
+
+def user_update_order_status(request, order_id, new_status):
+    order = get_object_or_404(Order, pk=order_id)
+
+    if new_status == 'New':
+        order.status = 'New'
+    elif new_status == 'Accepted':
+        order.status = 'Accepted'
+    elif new_status == 'Delivered':
+        order.status = 'Delivered'
+    elif new_status == 'Cancelled':
+        order.status = 'Cancelled'
+    
+    order.save()
+    
+    messages.success(request, f"Order #{order.order_number} has been updated to '{new_status}' status.")
+    
+    return redirect('user_order_details')
 
 # ----------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------user_wishlist--------------------------------------------------------
@@ -990,3 +1113,46 @@ def user_remove_wishlist(request, product_id):
 
     referer = request.META.get('HTTP_REFERER')
     return HttpResponseRedirect(referer or '/user_wishlist/')
+
+@login_required(login_url='user_login')
+def user_apply_coupon(request):
+    total = 0
+
+    if request.method == 'POST':
+        coupon_code = request.POST.get('coupon_code')  
+
+        try:
+            coupon = Coupons.objects.get(coupon_code=coupon_code, is_expired=False, valid_from__lte=timezone.now(), valid_to__gte=timezone.now())
+        except Coupons.DoesNotExist:
+            messages.error(request, 'Invalid coupon code or the coupon has expired.')
+            return redirect('user_cart')
+
+        if coupon.is_used_by_user(request.user):
+            messages.error(request, 'This coupon has already been used by you.')
+            return redirect('user_cart')
+
+        try:
+            if request.user.is_authenticated:
+                cart_items = CartItem.objects.filter(user=request.user, is_active=True)
+            else:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                cart_items = CartItem.objects.filter(cart=cart, is_active=True)
+
+            for cart_item in cart_items:
+                total += (cart_item.product.price * cart_item.quantity)
+        except Cart.DoesNotExist:
+            pass
+
+        if total < coupon.minimum_amount:
+            messages.error(request, 'The cart total does not meet the minimum purchase amount for this coupon.')
+            return redirect('user_cart')
+
+        request.session['applied_coupon_code'] = coupon.coupon_code
+        request.session['applied_coupon_discount'] = coupon.discount
+
+        messages.success(request, 'Coupon applied successfully.')
+
+    return redirect('user_cart')
+    
+
+

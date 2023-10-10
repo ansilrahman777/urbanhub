@@ -4,6 +4,7 @@ from django.urls import reverse
 from django import forms
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.utils import timezone 
 
 
 # Create your models here.
@@ -282,9 +283,9 @@ class Payment(models.Model):
 
 class Order(models.Model):
     STATUS =(
-        ('New','New'),
+        
         ('Accepted','Accepted'),
-        ('Completed','Completed'),
+        ('Delivered','Delivered'),
         ('Cancelled','Cancelled'),
     )
 
@@ -295,7 +296,7 @@ class Order(models.Model):
     order_total = models.CharField(max_length=50)
     tax = models.FloatField()
     order_note = models.TextField(blank=True) 
-    status = models.CharField(max_length=10,choices=STATUS,default='New')
+    status = models.CharField(max_length=10,choices=STATUS,default='Accepted')
     ip = models.CharField(blank=True,max_length=50)
     is_ordered = models.BooleanField(default=False)
     created_at= models.DateTimeField(auto_now_add=True)
@@ -319,3 +320,35 @@ class OrderProduct(models.Model):
 class Wishlist(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     product=models.ForeignKey(Product, on_delete=models.CASCADE)
+
+class Coupons(models.Model):
+    coupon_code = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    minimum_amount = models.IntegerField(default=10000)
+    discount = models.IntegerField(default=0)
+    is_expired = models.BooleanField(default=False)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+
+    def __str__(self):
+        return self.coupon_code
+
+    def is_valid(self):
+        now = timezone.now()
+        if self.valid_to != now:
+            self.is_expired = True
+            return self.is_expired
+        else:
+            return self.is_expired
+
+    def is_used_by_user(self, user):
+        redeemed_details = UserCoupons.objects.filter(coupon=self, user=user, is_used=True)
+        return redeemed_details.exists()
+
+class UserCoupons(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    coupon = models.ForeignKey(Coupons, on_delete=models.CASCADE)
+    is_used = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.coupon.coupon_code

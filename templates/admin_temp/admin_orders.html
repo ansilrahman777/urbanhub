@@ -89,16 +89,39 @@
                                     <td><b>{{order.address.first_name | capfirst}}</b></td>
                                     <td>{{order.address.phone}}</td>
                                     <td>{{order.order_total}}</td>
-                                    <td><span class="badge rounded-pill alert-danger">{{order.status}}</span></td>
+                                    <td>
+                                        {% if order.status == 'Delivered' %}
+                                            <span class="badge rounded-pill alert-success">{{ order.status }}</span>
+                                        {% comment %} {% elif order.status == 'Completed' %}
+                                            <span class="badge rounded-pill alert-success">{{ order.status }}</span> {% endcomment %}
+                                        {% elif order.status == 'Accepted' %}
+                                            <span class="badge rounded-pill alert-warning">{{ order.status }}</span>
+                                        {% elif order.status == 'Cancelled' %}
+                                            <span class="badge rounded-pill alert-danger">{{ order.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    
                                     <td>{{order.created_at}}</td>
                                     <td>
                                         <div class="dropdown">
-                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
+                                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">Edit</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
+                                                {% comment %} <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'New' %}">
+                                                    <i class="bx bx-package me-1"></i> New
+                                                </a> {% endcomment %}
+                                                <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Accepted' %}">
+                                                    <i class="bx bx-check me-1"></i> Accepted
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Delivered' %}">
+                                                    <i class="bx bx-user-check me-1"></i> Delivered
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Cancelled' %}">
+                                                    <i class="bx bx-trash me-1"></i> Canceled
+                                                </a>
                                             </div>
-                                        </div> <!-- dropdown //end -->
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}

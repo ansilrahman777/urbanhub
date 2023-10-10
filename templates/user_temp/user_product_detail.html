@@ -1,6 +1,6 @@
 {% extends 'user_temp/base.html' %}
 {% load static %}
-{% block title %}ABOUT{% endblock title %}
+{% block title %}PRODUCT DETAILS{% endblock title %}
 {% block body %}
 
     <!-- Breadcrumb Section Begin -->
@@ -11,7 +11,7 @@
           <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true" >&times;</spam></button>
         </div>
         {% endfor %}
-    <form action="{% url 'user_add_cart' single_product.id %}" method="POST">
+    <form id="cartForm" action="{% url 'user_add_cart' single_product.id %}" method="POST">
         {% csrf_token %}
         <div class="product__details__pic">
             <div class="container">
@@ -174,7 +174,7 @@
                                     {% if single_product.quantity <= 0 %}
                                     <a href="#" class="primary-btn" style="background-color: red; color: white;">out of stock</a>
                                     {% else %}
-                                    <button type="method"  class="primary-btn">add to cart</button>
+                                    <button type="method"  class="primary-btn" id="addToCartBtn">add to cart</button>
                                     {% endif %}
                                     {% if single_product in wishlist_products %}
                                         <div class="product__details__btns__option">
@@ -222,10 +222,32 @@
         });
     }
     
-    // Initialize the zoom effect for all images with class "zoomable-image"
     zoomableImages.forEach(function(image) {
         toggleZoom(image);
     });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+
+
+  <script>
+
+    document.getElementById('cartForm').addEventListener('submit', function(event) {
+      event.preventDefault(); 
+
+      swal({
+        title: "Item Added to Cart",
+        text: "The item has been added to your shopping cart.",
+        icon: "success",
+        buttons: {
+          confirm: "OK",
+        },
+      }).then((value) => {
+        if (value) {
+         
+          this.submit();
+        }
+      });
+    });
+  </script>
     
 {% endblock body %}

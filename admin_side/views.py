@@ -373,6 +373,27 @@ def admin_orders(request):
     }
     return render(request,'admin_temp/admin_orders.html',context)
 
+def admin_update_order_status(request, order_id, new_status):
+    order = get_object_or_404(Order, pk=order_id)
+    
+    if new_status == 'New':
+        order.status = 'New'
+    elif new_status == 'Accepted':
+        order.status = 'Accepted'
+    elif new_status == 'Delivered':
+        order.status = 'Delivered'
+    elif new_status == 'Cancelled':
+        order.status = 'Cancelled'
+    
+    order.save()
+    
+    messages.success(request, f"Order #{order.order_number} has been updated to '{new_status}' status.")
+    
+    return redirect('admin_orders')
+    
+
+
+
 def admin_coupons(request):
     return render(request,'admin_temp/admin_coupons.html')
 

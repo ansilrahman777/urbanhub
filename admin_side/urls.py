@@ -10,7 +10,6 @@ urlpatterns = [
     path('admin_index',views.admin_index,name='admin_index'),
     path('admin_category',views.admin_category,name='admin_category'),
     path('admin_products',views.admin_products,name='admin_products'),
-    path('admin_orders',views.admin_orders,name='admin_orders'),
     path('admin_coupons',views.admin_coupons,name='admin_coupons'),
     
     path('admin_users',views.admin_users,name='admin_users'),
@@ -27,6 +26,9 @@ urlpatterns = [
 
     path('admin_edit_category/<int:id>/',views.admin_edit_category,name='admin_edit_category'),
     path('admin_edit_product/<int:product_id>/', views.admin_edit_product, name='admin_edit_product'),
+
+    path('admin_orders',views.admin_orders,name='admin_orders'),
+    path('admin_update_order_status/<int:order_id>/<str:new_status>/', views.admin_update_order_status, name='admin_update_order_status'),
 
     
     

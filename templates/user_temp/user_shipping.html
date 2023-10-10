@@ -171,9 +171,7 @@
                                                 <button type="button"  class="btn btn-light" data-toggle="modal" data-target="#edit{{address.id}}">
                                                     EDIT
                                                 </button>
-                                                <a class="btn btn-danger" href="{% url 'user_remove_address' address.id %}" onclick="return confirm('Are you sure you want to delete?')" >
-                                                    REMOVE
-                                                </a>                              
+                                                                             
                                                 </div>
                                                 {% comment %} edit addresss modal {% endcomment %}
                                                 <div class="modal fade" id="edit{{address.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -313,9 +311,9 @@
                                                                 <button type="button"  class="btn btn-light" data-toggle="modal" data-target="#edit{{address.id}}">
                                                                 EDIT
                                                                 </button>
-                                                                <a class="btn btn-danger" href="{% url 'user_remove_address' address.id %}" onclick="return confirm('Are you sure you want to delete?')" >
+                                                                {% comment %} <a class="btn btn-danger" href="{% url 'user_remove_address' address.id %}" onclick="return confirm('Are you sure you want to delete?')" >
                                                                 REMOVE
-                                                                </a>                              
+                                                                </a>                               {% endcomment %}
                                                             </div>
                                                             {% comment %} edit addresss modal {% endcomment %}
                                                             <div class="modal fade" id="edit{{address.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -471,7 +469,8 @@
                                 <h6>Cart total</h6>
                                 <ul>
                                     <li>Subtotal <span>&#8377;&nbsp;{{total}}</span></li>
-                                    <li>Total <span>&#8377;&nbsp;{{total}}</span></li>
+                                    <li>Discount <span>-&nbsp;&nbsp;&#8377;&nbsp;{{applied_coupon_discount}}</span></li>
+                                    <li>Grand Total <span>&#8377;&nbsp;{{grand_total}}</span></li>
                                 </ul>
                             </div>
                             <a href="/user_checkout " class="primary-btn">Proceed to checkout</a>

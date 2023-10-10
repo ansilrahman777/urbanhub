@@ -25,6 +25,12 @@
 
 <!-- Shopping Cart Section Begin -->
 <section class="shopping-cart spad">
+    {% for messages in messages  %}
+        <div class="alert alert-{{messages.tags}} alert-dismissible fade show" role="alert">
+          <strong></strong>{{messages}}
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true" >&times;</spam></button>
+        </div>
+    {% endfor %}
     <div class="container">
         {% if not cart_items%}
         <div class="row">
@@ -81,9 +87,9 @@
                                     <div class="col"> 
                                         <div class="input-group input-spinner">
                                             <div class="input-group-prepend">
-                                                <a href="{% url 'user_remove_cart' cart_item.product.id cart_item.id %}" class="btn btn-light" type="button" id="button-minus"> <i class="fa fa-minus"></i> </a>
+                                                <a href="#" data-product-id="{{ cart_item.product.id }}" data-cart-item-id="{{ cart_item.id }}" class="btn btn-light button-minus"> <i class="fa fa-minus"></i> </a>
                                             </div>
-                                            <input type="text" class="form-control" name="quantity" value="{{ cart_item.quantity }}">
+                                            <input type="text" class="form-control quantity-input" name="quantity" value="{{ cart_item.quantity }}" data-cart-item-id="{{ cart_item.id }}">
                                             <div class="input-group-append">
                                                 <form action="{% url 'user_add_cart' cart_item.product.id %}" method="POST">
                                                     {% csrf_token %}
@@ -98,8 +104,8 @@
                                 </td>
                                 <td class="cart__price">{{cart_item.sub_total}}</td>
                                 <td class="cart__close">
-                                    <a href="{% url 'user_remove_cart_item' cart_item.product.id cart_item.id%}" onclick="return confirm('Are you sure you want to delete?')" ><i class="fa fa-close"></i> </a>
-                                </td>
+                                    <a href="#" data-product-id="{{ cart_item.product.id }}" data-cart-item-id="{{ cart_item.id }}" class="remove-from-cart"><i class="fa fa-close"></i> </a>
+                                </td>                                
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -121,16 +127,52 @@
             <div class="col-lg-4">
                 <div class="cart__discount">
                     <h6>Discount codes</h6>
-                    <form action="#">
-                        <input type="text" placeholder="Coupon code">
+                    <form method="post" action="{% url 'user_apply_coupon' %}" id="couponForm">
+                        {% csrf_token %}
+                        <input type="text" id="couponInput" name="coupon_code" placeholder="Coupon code" data-toggle="modal" data-target="#couponModal">
                         <button type="submit">Apply</button>
                     </form>
+                    {% if applied_coupon_code %}
+                    <div class="coupon-applied">
+                        <p>Coupon Applied: {{ applied_coupon_code }} - {{ applied_coupon_discount }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="?remove_coupon=1">Remove</a></p>
+                    </div>
+                    {% endif %}
                 </div>
+                
+                <!-- Bootstrap Modal -->
+                <div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-labelledby="couponModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="couponModalLabel">Coupon Code</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <label for="couponSelect">Select a coupon:</label>
+                                <select id="couponSelect" class="form-control">
+                                    <option value="">Coupons</option>
+                                    {% for coupon in coupons %}
+                                        <option value="{{ coupon.coupon_code }}">{{ coupon.coupon_code }} - {{ coupon.description }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="applyCouponBtn">Select</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                             
                 <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>
                         <li>Subtotal <span>&#8377;&nbsp;{{total}}</span></li>
-                        <li>Total <span>&#8377;&nbsp;{{total}}</span></li>
+                        <li>Discount <span>-&nbsp;&nbsp;&#8377;&nbsp;{{applied_coupon_discount}}</span></li>
+                        <li>Total <span>&#8377;&nbsp;{{grand_total}}</span></li>
                     </ul>
                     <a href="/user_shipping" class="primary-btn">Proceed to Shipping</a>
                 </div>
@@ -140,5 +182,112 @@
     </div>
 </section>
 <!-- Shopping Cart Section End -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(".remove-from-cart").click(function (e) {
+        e.preventDefault();
+    
+        var productId = $(this).data("product-id");
+        var cartItemId = $(this).data("cart-item-id");
+    
+        // Construct the URL dynamically
+        var url = `/user_remove_cart_item/${productId}/${cartItemId}/`;
+    
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+            },
+            success: function (data) {
+                // Handle success (e.g., update the cart view)
+                // You can use data to check if the item was successfully removed
+                // For example, if data.success is true, you can update the cart UI
+                // Remove the item from the cart UI without reloading the page
+                $(e.target).closest("tr").remove(); // Remove the row containing the item from the cart table
+            },
+            error: function (error) {
+                // Handle error
+                console.log(error);
+            }
+        });
+    });
+    $(document).ready(function () {
+        $(".button-minus").click(function (e) {
+            e.preventDefault(); // Prevent the default form submission behavior
+    
+            var productId = $(this).data("product-id");
+            var cartItemId = $(this).data("cart-item-id");
+    
+            var quantityInput = $(`.quantity-input[data-cart-item-id="${cartItemId}"]`);
+    
+            $.ajax({
+                type: "POST",
+                url: `/user_remove_cart/${productId}/${cartItemId}/`,
+                data: {
+                    csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+                },
+                success: function (data) {
+                    // Handle success (e.g., update the cart view)
+                    // You can use data to check if the item was successfully removed
+    
+                    // Update the quantity input value, ensuring it doesn't go negative
+                    var currentQuantity = parseInt(quantityInput.val());
+                    if (currentQuantity - 1 < 1) {
+                        // Remove the item from the cart UI without reloading the page
+                        $(e.target).closest("tr").remove(); // Remove the row containing the item from the cart table
+                    } else {
+                        // Update the quantity input value
+                        quantityInput.val(currentQuantity - 1);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    // Handle AJAX error
+                }
+            });
+        });
+    });
+    
+    
+    
+
+</script>
+
+
+<!-- JavaScript to update the hidden input field with the selected coupon code -->
+<script>
+    $(document).ready(function () {
+        $("#applyCouponBtn").click(function () {
+            // Get the selected coupon code from the select element in the modal
+            var selectedCoupon = $("#couponSelect").val();
+            
+            // Update the hidden input field with the selected coupon code
+            $("#couponInput").val(selectedCoupon);
+            
+            // Close the modal
+            $("#couponModal").modal("hide");
+        });
+    });
+</script>
+<script>
+    document.getElementById('couponForm').addEventListener('submit', function(event) {
+        // Prevent the form from submitting normally
+        event.preventDefault();
+        
+        // Get the value of the input field
+        var couponCode = document.getElementById('couponInput').value;
+        
+        // You can now use the 'couponCode' variable to do something with the input value
+        // For example, you can send it via AJAX or perform other operations
+        console.log('Coupon Code:', couponCode);
+        
+        // Now, you can submit the form if needed
+        this.submit();
+    });
+</script>
+
+
+
+
 
 {% endblock %}
