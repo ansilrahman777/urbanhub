@@ -27,11 +27,13 @@ urlpatterns = [
 
     path('admin_orders',views.admin_orders,name='admin_orders'),
     path('admin_update_order_status/<int:order_id>/<str:new_status>/', views.admin_update_order_status, name='admin_update_order_status'),
+    path('admin_order_details/<int:order_id>/',views.admin_order_details,name='admin_order_details'),
 
     path('admin_coupons',views.admin_coupons,name='admin_coupons'),
     path('admin_add_coupons',views.admin_add_coupons,name='admin_add_coupons'),
     path('admin_edit_coupons/<int:coupon_id>/',views.admin_edit_coupons,name='admin_edit_coupons'),
     path('admin_delete_coupons/<int:coupon_id>/',views.admin_delete_coupons,name='admin_delete_coupons'),
+    
     
     
 ]

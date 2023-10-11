@@ -41,8 +41,9 @@ urlpatterns = [
     path('user_payment/<str:order_number>/', views.user_payment, name='user_payment'),
     path('user_cash_on_delivery/<str:order_number>/', views.user_cash_on_delivery, name='user_cash_on_delivery'),
 
-    path('user_order_details',views.user_order_details,name='user_order_details'),
+    path('user_order',views.user_order,name='user_order'),
     path('user_update_order_status/<int:order_id>/<str:new_status>/', views.user_update_order_status, name='user_update_order_status'),
+    path('user_order_detailed_view/<int:order_id>/',views.user_order_detailed_view,name='user_order_detailed_view'),
 
 
     path('user_wishlist/', views.user_wishlist, name='user_wishlist'),

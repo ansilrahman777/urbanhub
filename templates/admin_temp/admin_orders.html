@@ -55,6 +55,14 @@
         </nav>
     </aside>
     <main class="main-wrap">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <strong></strong>{{ message }}
+            <button type="button" class="close" onclick="dismissAlert(this)">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
         <section class="content-main">
             <div class="content-header">
                 <div>
@@ -77,6 +85,7 @@
                                     <th scope="col">Name</th>
                                     <th scope="col">Mob Number</th>
                                     <th scope="col">Total Amount</th>
+                                    <th scope="col">Payment Method</th>
                                     <th scope="col">Status</th>
                                     <th scope="col"> Order Date</th>
                                     <th scope="col"> Action </th>
@@ -84,11 +93,12 @@
                             </thead>
                             <tbody>
                                 {% for order in orders %}
-                                <tr>
-                                    <td>{{order.order_number}}</td>
-                                    <td><b>{{order.address.first_name | capfirst}}</b></td>
+                                <tr >
+                                    <td><a href="{% url 'admin_order_details' order.id %}">{{order.order_number}}</a></td>
+                                    <td><b>{{order.address.first_name | capfirst}} {{order.address.last_name | capfirst}}</b></td>
                                     <td>{{order.address.phone}}</td>
                                     <td>{{order.order_total}}</td>
+                                    <td>{{order.payment.payment_method}}</td>
                                     <td>
                                         {% if order.status == 'Delivered' %}
                                             <span class="badge rounded-pill alert-success">Deliverd</span>
@@ -109,7 +119,7 @@
                                     <td>
                                         <div class="dropdown">
                                             <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                                <i class="bx bx-dots-vertical-rounded">{{order.status}}</i>
                                             </button>
                                             <div class="dropdown-menu">
                                                 

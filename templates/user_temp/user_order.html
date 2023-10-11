@@ -87,7 +87,7 @@
         <tbody>
         {% for order in orders %}
             <tr>
-            <td>{{order.order_number}}</td>
+            <td><a href="{% url 'user_order_detailed_view' order.id %}">{{order.order_number}}</a></td>
             <td>{{order.address.first_name | capfirst}}</td>
             <td>{{order.order_total}}</td>
             {% comment %} <td>{{order.created_at}}</td> {% endcomment %}

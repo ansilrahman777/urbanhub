@@ -1045,14 +1045,14 @@ def user_cash_on_delivery(request, order_number):
 
     return render(request,'user_temp/user_order_confirmed.html',context)
 
-def user_order_details(request):
+def user_order(request):
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
 
     context={
         'orders':orders
     }
 
-    return render(request,'user_temp/user_order_details.html',context)
+    return render(request,'user_temp/user_order.html',context)
 
 def user_update_order_status(request, order_id, new_status):
     order = get_object_or_404(Order, pk=order_id)
@@ -1073,6 +1073,25 @@ def user_update_order_status(request, order_id, new_status):
     messages.success(request, f"Order #{order.order_number} has been updated to '{new_status}' status.")
     
     return redirect('user_order_details')
+
+@login_required
+def user_order_detailed_view(request, order_id):
+    
+    order_products = OrderProduct.objects.filter(order__id=order_id)
+    orders = Order.objects.filter(is_ordered=True, id=order_id)
+    
+    payments = Payment.objects.filter(order__id=order_id)
+
+    for order_product in order_products:
+        order_product.total = order_product.quantity * order_product.product_price
+        order_product.single_product_total = order_product.quantity * order_product.product.price
+    context = {
+        'order_products': order_products,
+        'orders': orders,
+        'payments': payments,
+    }
+
+    return render(request, 'user_temp/user_order_detailed_view.html', context)
 
 # ----------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------user_wishlist--------------------------------------------------------
@@ -1124,6 +1143,12 @@ def user_remove_wishlist(request, product_id):
     return HttpResponseRedirect(referer or '/user_wishlist/')
 
 @login_required(login_url='user_login')
+
+# ----------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------user_coupons--------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------
+
+
 def user_apply_coupon(request):
     total = 0
 

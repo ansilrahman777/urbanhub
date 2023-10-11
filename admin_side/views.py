@@ -375,6 +375,25 @@ def admin_orders(request):
     }
     return render(request,'admin_temp/admin_orders.html',context)
 
+@login_required
+def admin_order_details(request, order_id):
+    
+    order_products = OrderProduct.objects.filter(order__id=order_id)
+    orders = Order.objects.filter(is_ordered=True, id=order_id)
+    
+    payments = Payment.objects.filter(order__id=order_id)
+
+    for order_product in order_products:
+        order_product.total = order_product.quantity * order_product.product_price
+        order_product.single_product_total = order_product.quantity * order_product.product.price
+    context = {
+        'order_products': order_products,
+        'orders': orders,
+        'payments': payments,
+    }
+
+    return render(request, 'admin_temp/admin_order_details.html', context)
+
 def admin_update_order_status(request, order_id, new_status):
     order = get_object_or_404(Order, pk=order_id)
     
@@ -393,8 +412,6 @@ def admin_update_order_status(request, order_id, new_status):
     
     return redirect('admin_orders')
     
-
-
 def admin_coupons(request):
     if not request.user.is_authenticated:
         return redirect('admin_login')

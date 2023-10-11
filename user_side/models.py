@@ -342,13 +342,12 @@ class Coupons(models.Model):
     def __str__(self):
         return self.coupon_code
 
-    def save(self, *args, **kwargs):
+    def is_valid(self):
         now = timezone.now()
-        if self.valid_to <= now:
+        if self.valid_to < now:
             self.is_expired = True
-        else:
-            self.is_expired = False
-        super().save(*args, **kwargs)
+        return not self.is_expired
+
 
     def is_used_by_user(self, user):
         redeemed_details = UserCoupons.objects.filter(coupon=self, user=user, is_used=True)
