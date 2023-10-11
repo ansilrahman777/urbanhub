@@ -275,15 +275,19 @@ def user_shop(request, category_slug=None):
         paged_products = paginator.get_page(page)
         product_count = products.count()
 
+    
+    wishlist_products = []
+    
     if user.is_authenticated:
         wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
-        context = {
-        'wishlist_products': wishlist_products }
+
+        
 
     context = {
         'products': paged_products,
         'product_count': product_count,
         'selected_category': category,
+        'wishlist_products': wishlist_products,
     }
 
     return render(request, 'user_temp/user_shop.html', context)
@@ -315,13 +319,14 @@ def user_product_detail(request,category_slug,product_slug):
     except Exception as e:
         raise e
 
+    wishlist_products = []
+    
     if user.is_authenticated:
         wishlist_products = [item.product for item in Wishlist.objects.filter(user=user)]
-        context = {
-        'wishlist_products': wishlist_products }
         
     context = {
         'single_product': single_product,
+        'wishlist_products':wishlist_products,
     }
     return render(request,'user_temp/user_product_detail.html',context)
 
@@ -922,6 +927,7 @@ def user_payment(request,order_number):
     order.is_ordered = True
     order.order_number = order_number
     order.payment = payment
+    order.status="Order Placed"
     order.save()
 
     applied_coupon_code = request.session.get('applied_coupon_code')
@@ -992,6 +998,7 @@ def user_cash_on_delivery(request, order_number):
     order.is_ordered = True
     order.order_number = order_number
     order.payment = payment
+    order.status="Order Placed"
     order.save()
     applied_coupon_code = request.session.get('applied_coupon_code')
 
@@ -1050,12 +1057,14 @@ def user_order_details(request):
 def user_update_order_status(request, order_id, new_status):
     order = get_object_or_404(Order, pk=order_id)
 
-    if new_status == 'New':
-        order.status = 'New'
+    if new_status == 'Order Placed':
+        order.status = 'Order Placed'
     elif new_status == 'Accepted':
         order.status = 'Accepted'
     elif new_status == 'Delivered':
         order.status = 'Delivered'
+    elif new_status == 'Return':
+        order.status = 'Return Pending'
     elif new_status == 'Cancelled':
         order.status = 'Cancelled'
     

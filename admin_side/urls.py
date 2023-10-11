@@ -10,14 +10,12 @@ urlpatterns = [
     path('admin_index',views.admin_index,name='admin_index'),
     path('admin_category',views.admin_category,name='admin_category'),
     path('admin_products',views.admin_products,name='admin_products'),
-    path('admin_coupons',views.admin_coupons,name='admin_coupons'),
     
     path('admin_users',views.admin_users,name='admin_users'),
     path('admin_user_block_unblock/<int:id>',views.admin_user_block_unblock,name='admin_user_block_unblock'),
 
     path('admin_enable_disable_category/<int:id>',views.admin_enable_disable_category,name='admin_enable_disable_category'),
     path('admin_unlist_list_product/<int:product_id>',views.admin_unlist_list_product,name='admin_unlist_list_product'),
-
 
     path('admin_banners',views.admin_banners,name='admin_banners'),
 
@@ -30,6 +28,10 @@ urlpatterns = [
     path('admin_orders',views.admin_orders,name='admin_orders'),
     path('admin_update_order_status/<int:order_id>/<str:new_status>/', views.admin_update_order_status, name='admin_update_order_status'),
 
+    path('admin_coupons',views.admin_coupons,name='admin_coupons'),
+    path('admin_add_coupons',views.admin_add_coupons,name='admin_add_coupons'),
+    path('admin_edit_coupons/<int:coupon_id>/',views.admin_edit_coupons,name='admin_edit_coupons'),
+    path('admin_delete_coupons/<int:coupon_id>/',views.admin_delete_coupons,name='admin_delete_coupons'),
     
     
 ]

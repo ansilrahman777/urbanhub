@@ -55,28 +55,37 @@
         </nav>
     </aside>
     <main class="main-wrap">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <strong></strong>{{ message }}
+            <button type="button" class="close" onclick="dismissAlert(this)">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
         <section class="content-main">
             <div class="content-header">
                 <div>
                     <h2 class="content-title card-title">Coupon List </h2>
                 </div>
                 <div>
-                    <a href="#" class="btn btn-primary btn-sm rounded">Add coupon</a>
+                    <a href="/admin_add_coupons" class="btn btn-primary btn-sm rounded">Add coupon</a>
                 </div>
             </div>
             <div class="card mb-4">
-                <header class="card-header">
+                {% comment %} <header class="card-header">
                     <div class="row gx-3">
                         <div class="col-lg-4 col-md-6 me-auto">
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
-                </header>
+                </header> {% endcomment %}
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
                                     <th scope="col">Coupon Name</th>
+                                    <th scope="col">Discription</th>
                                     <th scope="col">Min Purchase</th>
                                     <th scope="col">Discount Amount</th>
                                     <th scope="col">Expiry Date</th>
@@ -85,44 +94,28 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for coupon in coupons %}
                                 <tr>
-                                    <td><b>Esther Howard</b></td>
-                                    <td>$123</td>
-                                    <td>$12.00</td>
-                                    <td>03.07.2023</td>
-                                    <td><span class="badge rounded-pill alert-success">active</span></td>
-                                    <td>
-                                        <div class="dropdown">
-                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">block</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
-                                            </div>
-                                        </div> <!-- dropdown //end -->
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><b>Esther Howard</b></td>
-                                    <td>$123</td>
-                                    <td>$12.00</td>
-                                    <td>03.07.2023</td>
+                                    <td><b><a href="{% url 'admin_edit_coupons' coupon.id %}">{{coupon.coupon_code}}</a></b></td>
+                                    <td>{{coupon.description}}</td>
+                                    <td>{{coupon.minimum_amount}}</td>
+                                    <td>{{coupon.discount}}</td>
+                                    <td>{{coupon.valid_to}}</td>
+                                    {% if coupon.is_expired %}
                                     <td><span class="badge rounded-pill alert-danger">Expired</span></td>
+                                    {% else %}
+                                    <td><span class="badge rounded-pill alert-success">Active</span></td>
+                                    {% endif %}
                                     <td>
-                                        <div class="dropdown">
-                                        <a href="#" data-bs-toggle="dropdown" class="btn btn-md rounded font-sm">Action</a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">block</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
-                                            </div>
-                                        </div> <!-- dropdown //end -->
+                                        <a href="{% url 'admin_delete_coupons' coupon.id %}"  class="btn btn-md rounded font-sm">Delete</a>
                                     </td>
                                 </tr>
-                            
+                                {% endfor %}
                             </tbody>
                         </table>
-                    </div> <!-- table-responsive //end -->
-                </div> <!-- card-body end// -->
-            </div> <!-- card end// -->
+                    </div> 
+                </div> 
+            </div> 
         </section>
     </main>
 

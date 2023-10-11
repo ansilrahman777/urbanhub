@@ -97,9 +97,11 @@
                     {% if order.status == 'Accepted' %}
                         <a href="{% url 'user_update_order_status' order.id 'Cancelled' %}" class="btn btn-danger">Cancel</a>
                     {% elif order.status == 'Delivered' %}
-                        <a href="{% url 'user_update_order_status' order.id 'Cancelled' %}" class="btn btn-warning">Return</a>
+                        <a href="{% url 'user_update_order_status' order.id 'Return' %}" class="btn btn-warning">Return</a>
+                    {% elif order.status == 'Returned' %}
+                      Order Returned 
                     {% elif order.status == 'Cancelled' %}
-                        Order Cancelled
+                      Order Cancelled
                     {% endif %}
                 </td>
             </tr>

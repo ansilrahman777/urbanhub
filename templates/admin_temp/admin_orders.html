@@ -62,12 +62,12 @@
                 </div>
             </div>
             <div class="card mb-4">
-                <header class="card-header">
+                {% comment %} <header class="card-header">
                     <div class="row gx-3">
                         <div class="col-lg-4 col-md-6 me-auto">
                             <input type="text" placeholder="Search..." class="form-control">
                         </div>
-                </header>
+                </header> {% endcomment %}
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -91,13 +91,17 @@
                                     <td>{{order.order_total}}</td>
                                     <td>
                                         {% if order.status == 'Delivered' %}
-                                            <span class="badge rounded-pill alert-success">{{ order.status }}</span>
-                                        {% comment %} {% elif order.status == 'Completed' %}
-                                            <span class="badge rounded-pill alert-success">{{ order.status }}</span> {% endcomment %}
+                                            <span class="badge rounded-pill alert-success">Deliverd</span>
+                                        {% elif order.status == 'Order Placed' %}
+                                            <span class="badge rounded-pill alert-success">Placed</span>
                                         {% elif order.status == 'Accepted' %}
-                                            <span class="badge rounded-pill alert-warning">{{ order.status }}</span>
+                                            <span class="badge rounded-pill alert-warning">Accepted</span>
                                         {% elif order.status == 'Cancelled' %}
-                                            <span class="badge rounded-pill alert-danger">{{ order.status }}</span>
+                                            <span class="badge rounded-pill alert-danger">Cancelled</span>
+                                        {% elif order.status == 'Returned' %}
+                                            <span class="badge rounded-pill alert-danger">Returned</span>
+                                        {% elif order.status == 'Return Pending' %}
+                                            <span class="badge rounded-pill alert-danger">Return Pending</span>
                                         {% endif %}
                                     </td>
                                     
@@ -108,17 +112,18 @@
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <div class="dropdown-menu">
-                                                {% comment %} <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'New' %}">
-                                                    <i class="bx bx-package me-1"></i> New
-                                                </a> {% endcomment %}
+                                                
                                                 <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Accepted' %}">
-                                                    <i class="bx bx-check me-1"></i> Accepted
+                                                    <i class="bx bx-check me-1"></i> Accept
                                                 </a>
                                                 <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Delivered' %}">
-                                                    <i class="bx bx-user-check me-1"></i> Delivered
+                                                    <i class="bx bx-user-check me-1"></i> Deliver
+                                                </a>
+                                                <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Return' %}">
+                                                    <i class="bx bx-user-check me-1"></i> Return
                                                 </a>
                                                 <a class="dropdown-item" href="{% url 'admin_update_order_status' order.id 'Cancelled' %}">
-                                                    <i class="bx bx-trash me-1"></i> Canceled
+                                                    <i class="bx bx-trash me-1"></i> Cancel
                                                 </a>
                                             </div>
                                         </div>

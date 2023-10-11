@@ -1,6 +1,6 @@
 {% extends 'admin_temp/base.html' %}
 {% load static %}
-{% block title %}ADD CATEGORY{% endblock title %}
+{% block title %}COUPONS{% endblock title %}
 {% block body %}
 
     <div class="screen-overlay"></div>
@@ -25,7 +25,7 @@
                         <span class="text">Category</span>
                     </a>
                 </li>
-                <li class="menu-item active">
+                <li class="menu-item">
                     <a class="menu-link" href="/admin_products"> <i class="icon material-icons md-shopping_bag"></i>
                         <span class="text">Products</span>
                     </a>
@@ -35,7 +35,7 @@
                         <span class="text">Orders</span>
                     </a>
                 </li>
-                <li class="menu-item">
+                <li class="menu-item active">
                     <a class="menu-link" href="/admin_coupons"> <i class="icon material-icons md-local_offer"></i>
                         <span class="text">Coupon</span>
                     </a>
@@ -45,7 +45,7 @@
                         <span class="text">Users List</span>
                     </a>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item  ">
                     <a class="menu-link" href="/admin_banners"> <i class="icon material-icons md-store"></i>
                         <span class="text">Banners</span>
                     </a>
@@ -54,7 +54,6 @@
             
         </nav>
     </aside>
-
     <main class="main-wrap">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -65,25 +64,23 @@
         </div>
         {% endfor %}
         <section class="content-main">
-        <form method="post" action="/admin_add_product" enctype="multipart/form-data">
-            {% csrf_token %}            
-            <div class="row">
+            <form method="post" action="/admin_add_coupons" >
+                {% csrf_token %}   
                 <div class="col-9">
                     <div class="content-header">
-                        <h2 class="content-title">Add New Product</h2>
+                        <h2 class="content-title">Add New Coupon</h2>
                         <div>
-                           <button type='Submit' class="btn btn-md rounded font-sm hover-up">Submit</button>
+                        <button type='Submit' class="btn btn-md rounded font-sm hover-up">Submit</button>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <div class="card mb-4">
-                        
                         <div class="card-body">
                             
                                 <div class="mb-4">
-                                    <label for="product_name" class="form-label">Product Name</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name='product_name' required>
+                                    <label for="product_name" class="form-label">Coupon Code </label>
+                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name='coupon_code' required>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
@@ -92,79 +89,44 @@
                                 <div class="row">
                                     <div class="col-lg-4">
                                         <div class="mb-4">
-                                            <label class="form-label">Price</label>
+                                            <label class="form-label">Minimum Purchase</label>
                                             <div class="row gx-2">
-                                                <input placeholder="$" type="text" class="form-control"  name='price' required>
+                                                <input placeholder="$" type="text" class="form-control"  name='minimum_amount' required>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
                                         <div class="mb-4">
-                                            <label class="form-label">Quatity</label>
-                                            <input placeholder="" type="text" class="form-control"  name='quantity' required>
+                                            <label class="form-label">Discount Amount</label>
+                                            <div class="row gx-2">
+                                                <input placeholder="$" type="text" class="form-control"  name='discount' required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="mb-4">
+                                            <label class="form-label">Valid From</label>
+                                            <div class="row gx-2">
+                                                <input type="datetime-local" class="form-control" name="valid_from" required>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-select" name='category'>
-                                            {% for category in categories %}
-                                            <option value="{{ category.id }}">{{ category.category_name }} </option>
-                                            {% endfor %}
-                                        </select>
+                                        <div class="mb-4">
+                                            <label class="form-label">Valid To</label>
+                                            <div class="row gx-2">
+                                                <input type="datetime-local" class="form-control" name="valid_to" required>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                         </div>
                     </div> <!-- card end// -->
                 </div>
-                <div class="col-lg-6">
-                    <div class="card-header">
-                        <h4>MEDIA</h4>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <div class="input-upload">
-                                        <img id="preview-images" src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
-                                        <input class="form-control file-input" type="file" name='product_images' data-preview-id="preview-images" required>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="input-upload">
-                                        <img id="preview-image-1" src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
-                                        <input class="form-control file-input" type="file" name='product_image_1' data-preview-id="preview-image-1" required>
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <div class="input-upload">
-                                        <img id="preview-image-2" src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
-                                        <input class="form-control file-input" type="file" name='product_image_2' data-preview-id="preview-image-2"required>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="input-upload">
-                                        <img id="preview-image-3" src="{% static 'assets/imgs/theme/upload.svg' %}" alt="">
-                                        <input class="form-control file-input" type="file" name='product_image_3' data-preview-id="preview-image-3" required>
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
-                    </div>
-                </div>
-                     
-            </div>
-        </form>
+            </form>
         </section>
     </main>
 
-
-
-
 {% endblock body %}
-
-
-    

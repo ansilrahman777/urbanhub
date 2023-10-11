@@ -283,10 +283,14 @@ class Payment(models.Model):
 
 class Order(models.Model):
     STATUS =(
-        
+        ('Order Placed','Order Placed'),
         ('Accepted','Accepted'),
         ('Delivered','Delivered'),
         ('Cancelled','Cancelled'),
+        ('Return Pending','Return Pending'),
+        ('Returned','Returned'),
+        ('Payment Failed','Payment Failed'),
+        ('Order Failed','Order Failed'),
     )
 
     user = models.ForeignKey(User,on_delete=models.SET_NULL,null=True)
@@ -296,7 +300,7 @@ class Order(models.Model):
     order_total = models.CharField(max_length=50)
     tax = models.FloatField()
     order_note = models.TextField(blank=True) 
-    status = models.CharField(max_length=10,choices=STATUS,default='Accepted')
+    status = models.CharField(max_length=20,choices=STATUS,default='Order Placed')
     ip = models.CharField(blank=True,max_length=50)
     is_ordered = models.BooleanField(default=False)
     created_at= models.DateTimeField(auto_now_add=True)
@@ -304,6 +308,11 @@ class Order(models.Model):
 
     def __str__(self):
         return self.user.first_name
+   
+    def save(self, *args, **kwargs):
+        if not self.is_ordered:
+            self.status = 'Order Failed'
+        super().save(*args, **kwargs)
 
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -333,13 +342,13 @@ class Coupons(models.Model):
     def __str__(self):
         return self.coupon_code
 
-    def is_valid(self):
+    def save(self, *args, **kwargs):
         now = timezone.now()
-        if self.valid_to != now:
+        if self.valid_to <= now:
             self.is_expired = True
-            return self.is_expired
         else:
-            return self.is_expired
+            self.is_expired = False
+        super().save(*args, **kwargs)
 
     def is_used_by_user(self, user):
         redeemed_details = UserCoupons.objects.filter(coupon=self, user=user, is_used=True)

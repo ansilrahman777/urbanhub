@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponse
-from user_side.models import Product,Category,User,Order,Payment,OrderProduct
+from user_side.models import Product,Category,User,Order,Payment,OrderProduct,Coupons,UserCoupons
 from django.contrib import messages,auth
 from user_side.forms import SignupForm
 from django.contrib.auth import authenticate, login,logout
@@ -10,6 +10,8 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.cache import cache_control
 from django.utils.text import slugify
 from django.db import IntegrityError
+from datetime import datetime
+from django.utils import timezone
 
 # Create your views here.
 
@@ -376,14 +378,14 @@ def admin_orders(request):
 def admin_update_order_status(request, order_id, new_status):
     order = get_object_or_404(Order, pk=order_id)
     
-    if new_status == 'New':
-        order.status = 'New'
+    if new_status == 'Cancelled':
+        order.status = 'Cancelled'
     elif new_status == 'Accepted':
         order.status = 'Accepted'
     elif new_status == 'Delivered':
         order.status = 'Delivered'
-    elif new_status == 'Cancelled':
-        order.status = 'Cancelled'
+    elif new_status == 'Return':
+        order.status = 'Returned'
     
     order.save()
     
@@ -393,7 +395,112 @@ def admin_update_order_status(request, order_id, new_status):
     
 
 
-
 def admin_coupons(request):
-    return render(request,'admin_temp/admin_coupons.html')
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+
+    coupons = Coupons.objects.all()
+    context = {'coupons': coupons}
+    return render(request, 'admin_temp/admin_coupons.html', context)
+    
+
+def admin_add_coupons(request):
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+
+    if request.method == 'POST':
+        coupon_code = request.POST.get('coupon_code')
+        description = request.POST.get('description')
+        minimum_amount = request.POST.get('minimum_amount')
+        discount = request.POST.get('discount')
+        valid_from_str = request.POST.get('valid_from')
+        valid_to_str = request.POST.get('valid_to')
+
+        try:
+            minimum_amount = int(minimum_amount)
+            discount = int(discount)
+        except ValueError:
+            messages.error(request, "Minimum Amount and Discount must be integers.")
+            return redirect('admin_add_coupons')
+
+        try:
+            valid_from = datetime.strptime(valid_from_str, '%Y-%m-%dT%H:%M')
+            valid_to = datetime.strptime(valid_to_str, '%Y-%m-%dT%H:%M')
+
+            valid_from = timezone.make_aware(valid_from, timezone=timezone.utc)
+            valid_to = timezone.make_aware(valid_to, timezone=timezone.utc)
+        except ValueError:
+            messages.error(request, "Date and Time must be in a proper format.")
+            return redirect('admin_add_coupons')
+
+        coupon = Coupons(
+            coupon_code=coupon_code,
+            description=description,
+            minimum_amount=minimum_amount,
+            discount=discount,
+            valid_from=valid_from,
+            valid_to=valid_to
+        )
+        coupon.save()
+        messages.success(request, "Coupon added successfully.")
+        return redirect('admin_coupons')
+
+    return render(request,'admin_temp/admin_add_coupons.html')
+
+
+def admin_edit_coupons(request, coupon_id):
+    try:
+        coupon = Coupons.objects.get(pk=coupon_id)
+    except Coupons.DoesNotExist:
+        return redirect('admin_coupons')
+
+    if request.method == 'POST':
+        coupon.coupon_code = request.POST.get('coupon_code')
+        coupon.description = request.POST.get('description')
+        coupon.minimum_amount = int(request.POST.get('minimum_amount'))
+        coupon.discount = int(request.POST.get('discount'))
+        valid_from_str = request.POST.get('valid_from')
+        valid_to_str = request.POST.get('valid_to')
+
+        try:
+            minimum_amount = int(request.POST.get('minimum_amount'))
+            discount = int(request.POST.get('discount'))
+        except ValueError:
+            messages.error(request, "Minimum Amount and Discount must be integers.")
+            return redirect('admin_edit_coupons', coupon_id=coupon_id)
+
+        try:
+            valid_from = datetime.strptime(valid_from_str, '%Y-%m-%dT%H:%M')
+            valid_to = datetime.strptime(valid_to_str, '%Y-%m-%dT%H:%M')
+
+            valid_from = timezone.make_aware(valid_from, timezone=timezone.utc)
+            valid_to = timezone.make_aware(valid_to, timezone=timezone.utc)
+        except ValueError:
+            messages.error(request, "Date and Time must be in a proper format.")
+            return redirect('admin_edit_coupons', coupon_id=coupon_id)
+
+        coupon.valid_from = valid_from
+        coupon.valid_to = valid_to
+        
+        coupon.save()
+        
+        return redirect('admin_coupons')
+
+    context = {'coupon': coupon}
+    return render(request, 'admin_temp/admin_edit_coupons.html', context)
+
+@login_required
+def admin_delete_coupons(request, coupon_id):
+    try:
+        coupon = Coupons.objects.get(pk=coupon_id)
+    except Coupons.DoesNotExist:
+        return redirect('admin_coupons')
+
+    
+    coupon.delete()
+    messages.success(request, "Coupon deleted successfully.")
+    
+    return redirect('admin_coupons')
+
+
 
